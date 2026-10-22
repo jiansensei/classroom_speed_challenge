@@ -828,38 +828,15 @@
               class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider"
               >Question Image Selection (Optional)</label
             >
-            <select
-              id="adminImageDropdown"
-              onchange="onImageDropdownChange(this.value)"
-              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white cursor-pointer"
-            >
-              <option value="">-- No Image / Select Preset --</option>
-              <option
-                value="https://placehold.co/400x200/1e293b/38bdf8?text=Oxygen+Element+(O)"
-              >
-                Oxygen Element (O)
-              </option>
-              <option
-                value="https://placehold.co/400x200/1e293b/ef4444?text=Planet+Mars"
-              >
-                Planet Mars
-              </option>
-              <option
-                value="https://placehold.co/400x200/1e293b/22c55e?text=Photosynthesis"
-              >
-                Photosynthesis Diagram
-              </option>
-              <option
-                value="https://placehold.co/400x200/1e293b/eab308?text=Eiffel+Tower+Paris"
-              >
-                Eiffel Tower Paris
-              </option>
-              <option
-                value="https://placehold.co/400x200/1e293b/a855f7?text=Math+Equation"
-              >
-                Math Equation Graphic
-              </option>
-            </select>
+
+            <!-- Image URL Field -->
+            <input
+              id="adminImageUrlInput"
+              type="url"
+              placeholder="Paste Image URL from web (e.g. https://example.com/image.png)"
+              oninput="onImageUrlInput(this.value)"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white focus:ring-1 focus:ring-amber-400 focus:outline-none mb-1"
+            />
 
             <!-- Image Drag and Drop / File Upload Zone -->
             <div
@@ -924,6 +901,99 @@
         </div>
       </div>
     </main>
+
+    <!-- ================= EDIT QUESTION MODAL ================= -->
+    <div
+      id="editQuestionModal"
+      class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="w-full max-w-lg glass-card rounded-3xl p-6 space-y-4 border border-amber-500/30 shadow-2xl relative"
+      >
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-bold text-amber-300 font-display">
+            Edit Question
+          </h3>
+          <button
+            onclick="closeEditModal()"
+            class="text-xs text-slate-400 hover:text-white"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form onsubmit="saveEditedQuestion(event)" class="space-y-3">
+          <input type="hidden" id="editQuestionIndex" />
+
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"
+              >Subject Category</label
+            >
+            <select
+              id="editCategory"
+              required
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+            ></select>
+          </div>
+
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"
+              >Question Prompt</label
+            >
+            <input
+              id="editPrompt"
+              type="text"
+              required
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"
+              >Correct Answer</label
+            >
+            <input
+              id="editAnswer"
+              type="text"
+              required
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"
+              >Image URL / Base64 Data (Optional)</label
+            >
+            <input
+              id="editImageUrl"
+              type="text"
+              placeholder="https://example.com/image.png"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+            />
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <button
+              type="submit"
+              class="flex-1 py-2 bg-emerald-500 hover:bg-emerald-400 font-bold text-slate-950 text-xs rounded-xl shadow"
+            >
+              Save Changes
+            </button>
+            <button
+              type="button"
+              onclick="closeEditModal()"
+              class="px-4 py-2 bg-slate-800 hover:bg-slate-700 font-bold text-slate-300 text-xs rounded-xl"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <!-- ================= DETHRONE / CHAMPION MODAL ================= -->
     <div
@@ -1433,28 +1503,93 @@
         listElem.innerHTML = defaultQuestions
           .map(
             (q, idx) => `
-        <div class="p-3 bg-slate-900/80 border border-slate-700/60 rounded-xl flex items-center justify-between text-xs">
-          <div class="truncate mr-2">
+        <div class="p-3 bg-slate-900/80 border border-slate-700/60 rounded-xl flex items-center justify-between text-xs gap-2">
+          <div class="truncate flex-1">
             <span class="text-amber-400 font-bold mr-1">[${q.category}]</span>
             <span class="text-white">${q.prompt}</span>
             <span class="text-emerald-400 block text-[10px]">Answer: ${q.answer}</span>
           </div>
-          <button onclick="deleteQuestion(${idx})" class="text-rose-400 hover:text-rose-300 px-2 py-1 bg-rose-500/10 rounded-lg border border-rose-500/20">
-            <i class="fa-solid fa-trash"></i>
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="editQuestion(${idx})" class="text-sky-400 hover:text-sky-300 px-2 py-1 bg-sky-500/10 rounded-lg border border-sky-500/20" title="Edit Question">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button onclick="deleteQuestion(${idx})" class="text-rose-400 hover:text-rose-300 px-2 py-1 bg-rose-500/10 rounded-lg border border-rose-500/20" title="Delete Question">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
         </div>
       `,
           )
           .join("");
       }
 
-      // --- IMAGE DROPBOX & PRESET SELECTION LOGIC ---
+      // --- EDIT QUESTION FUNCTIONS ---
+      function editQuestion(index) {
+        const q = defaultQuestions[index];
+        if (!q) return;
+
+        const modal = document.getElementById("editQuestionModal");
+        const idxInput = document.getElementById("editQuestionIndex");
+        const catSelect = document.getElementById("editCategory");
+        const promptInput = document.getElementById("editPrompt");
+        const answerInput = document.getElementById("editAnswer");
+        const imgInput = document.getElementById("editImageUrl");
+
+        catSelect.innerHTML = CATEGORIES.map(
+          (c) => `<option value="${c}">${c}</option>`,
+        ).join("");
+
+        idxInput.value = index;
+        catSelect.value = q.category || CATEGORIES[0];
+        promptInput.value = q.prompt || "";
+        answerInput.value = q.answer || "";
+        imgInput.value = q.image || "";
+
+        if (modal) modal.classList.remove("hidden");
+      }
+
+      function closeEditModal() {
+        const modal = document.getElementById("editQuestionModal");
+        if (modal) modal.classList.add("hidden");
+      }
+
+      function saveEditedQuestion(e) {
+        if (e) e.preventDefault();
+        const index = parseInt(
+          document.getElementById("editQuestionIndex").value,
+          10,
+        );
+        if (isNaN(index) || !defaultQuestions[index]) return;
+
+        defaultQuestions[index].category =
+          document.getElementById("editCategory").value;
+        defaultQuestions[index].prompt =
+          document.getElementById("editPrompt").value;
+        defaultQuestions[index].answer =
+          document.getElementById("editAnswer").value;
+        defaultQuestions[index].image =
+          document.getElementById("editImageUrl").value;
+
+        closeEditModal();
+        renderAdminQuestions();
+        alert("Question updated successfully!");
+      }
+
+      // --- IMAGE INPUT & DROPBOX LOGIC ---
+      function onImageUrlInput(val) {
+        const imageInput = document.getElementById("adminImage");
+        const dropdown = document.getElementById("adminImageDropdown");
+        if (imageInput) imageInput.value = val;
+        if (dropdown) dropdown.value = "";
+        showImagePreview(val);
+      }
+
       function onImageDropdownChange(val) {
         const imageInput = document.getElementById("adminImage");
-        if (imageInput) {
-          imageInput.value = val;
-          showImagePreview(val);
-        }
+        const urlInput = document.getElementById("adminImageUrlInput");
+        if (imageInput) imageInput.value = val;
+        if (urlInput) urlInput.value = val;
+        showImagePreview(val);
       }
 
       function handleDragOver(e) {
@@ -1500,7 +1635,9 @@
         reader.onload = function (event) {
           const base64Url = event.target.result;
           const imageInput = document.getElementById("adminImage");
+          const urlInput = document.getElementById("adminImageUrlInput");
           if (imageInput) imageInput.value = base64Url;
+          if (urlInput) urlInput.value = "";
           const dropdown = document.getElementById("adminImageDropdown");
           if (dropdown) dropdown.value = "";
           showImagePreview(base64Url);
@@ -1527,6 +1664,7 @@
       function clearUploadedImage(e) {
         if (e) e.stopPropagation();
         const imageInput = document.getElementById("adminImage");
+        const urlInput = document.getElementById("adminImageUrlInput");
         const fileInput = document.getElementById("fileInput");
         const previewContainer = document.getElementById(
           "imagePreviewContainer",
@@ -1535,6 +1673,7 @@
         const dropdown = document.getElementById("adminImageDropdown");
 
         if (imageInput) imageInput.value = "";
+        if (urlInput) urlInput.value = "";
         if (fileInput) fileInput.value = "";
         if (dropdown) dropdown.value = "";
         if (previewContainer) previewContainer.classList.add("hidden");
@@ -1570,9 +1709,18 @@
 
       // --- IMPORT / EXPORT QUESTIONS FUNCTIONS ---
       function exportQuestionsJSON() {
+        // Tinitiyak na kasama ang category sa export data
+        const exportData = defaultQuestions.map((q) => ({
+          id: q.id || Date.now(),
+          category: q.category || "General Knowledge",
+          prompt: q.prompt,
+          answer: q.answer,
+          image: q.image || "",
+        }));
+
         const dataStr =
           "data:text/json;charset=utf-8," +
-          encodeURIComponent(JSON.stringify(defaultQuestions, null, 2));
+          encodeURIComponent(JSON.stringify(exportData, null, 2));
         const downloadAnchor = document.createElement("a");
         downloadAnchor.setAttribute("href", dataStr);
         downloadAnchor.setAttribute("download", "eduquiz_questions.json");
@@ -1590,7 +1738,21 @@
           try {
             const importedData = JSON.parse(event.target.result);
             if (Array.isArray(importedData)) {
-              defaultQuestions = importedData;
+              defaultQuestions = importedData.map((q) => ({
+                id: q.id || Date.now(),
+                category: q.category || "General Knowledge",
+                prompt: q.prompt || "",
+                answer: q.answer || "",
+                image: q.image || "",
+              }));
+
+              // I-sync ang mga bagong kategorya kung mayroon
+              defaultQuestions.forEach((q) => {
+                if (q.category && !CATEGORIES.includes(q.category)) {
+                  CATEGORIES.push(q.category);
+                }
+              });
+
               renderAdminQuestions();
               initDropdowns();
               alert("Questions successfully imported!");
@@ -1737,7 +1899,6 @@
         }, 100);
       }
 
-      // SPEED CHALLENGE LOGIC (Deretsong bawas ng 1 pt/s nang walang delay)
       function startSpeedChallengePointsLogic() {
         clearInterval(timerInterval);
         clearInterval(speedPointInterval);
@@ -1772,13 +1933,13 @@
 
         if (counter)
           counter.innerText = `Question ${questionIndex + 1} of ${currentQuestions.length}`;
-        if (prompt) prompt.innerText = q.prompt;
-        if (answer) answer.innerText = q.answer;
+        if (prompt) prompt.innerText = q ? q.prompt : "No questions available.";
+        if (answer) answer.innerText = q ? q.answer : "";
 
         const imgContainer = document.getElementById("questionImageContainer");
         const imgElem = document.getElementById("questionImage");
         if (imgContainer && imgElem) {
-          if (q.image && q.image.trim() !== "") {
+          if (q && q.image && q.image.trim() !== "") {
             imgElem.src = q.image;
             imgContainer.classList.remove("hidden");
           } else {
@@ -1793,7 +1954,6 @@
         updateScoreUI();
       }
 
-      // FLOATING POINT ANIMATION FUNCTION
       function showFloatingPointsAnimation(pointsAdded) {
         const container = document.getElementById("floatingPointContainer");
         if (!container) return;
@@ -1827,9 +1987,9 @@
 
         if (currentMode === "speedChallenge") {
           fireLaserCannon();
-          let added = 3; // Ginawang 3 points ang tamang sagot sa speed mode
+          let added = 3;
           if (isAsteroidImpact) {
-            added = 5; // +5 bonus kapag nakaligtas sa impact area
+            added = 5;
           }
           score += added;
           showFloatingPointsAnimation(added);
