@@ -1,0 +1,2199 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Classroom Team Games: Beat the Time & Speed Challenge</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Plus Jakarta Sans", "sans-serif"],
+              display: ["Fredoka", "sans-serif"],
+            },
+            colors: {
+              brand: {
+                50: "#f0fdf4",
+                100: "#dcfce7",
+                500: "#22c55e",
+                600: "#16a34a",
+                700: "#15803d",
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: radial-gradient(
+          circle at top center,
+          #1e1b4b 0%,
+          #0f172a 60%,
+          #020617 100%
+        );
+        min-height: 100vh;
+        color: #f8fafc;
+      }
+
+      .glass-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      }
+
+      .glass-card-amber {
+        background: rgba(45, 30, 10, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+
+      .game-btn {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .game-btn:active {
+        transform: scale(0.96);
+      }
+
+      @keyframes pulse-glow {
+        0%,
+        100% {
+          box-shadow: 0 0 15px rgba(234, 179, 8, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 30px rgba(234, 179, 8, 0.8);
+        }
+      }
+
+      .glow-gold {
+        animation: pulse-glow 2s infinite;
+      }
+
+      /* FLOATING POINTS ANIMATION */
+      @keyframes floatUpFade {
+        0% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: translateY(-20px) scale(1.3);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-40px) scale(1);
+        }
+      }
+
+      .animate-float-point {
+        animation: floatUpFade 1.2s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body
+    class="p-3 sm:p-6 flex flex-col justify-between items-center text-slate-100 min-h-screen"
+  >
+    <header class="w-full max-w-4xl text-center my-4">
+      <div
+        class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold mb-2"
+      >
+        <i class="fa-solid fa-graduation-cap"></i> Interactive Classroom Team
+        Games・Idea by Jian Caballero
+      </div>
+      <h1
+        class="text-3xl sm:text-5xl font-extrabold font-display tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-300 via-orange-400 to-amber-200 drop-shadow-sm"
+      >
+        Classroom Team Challenge
+      </h1>
+      <p
+        id="headerSubModeTitle"
+        class="text-xs sm:text-sm text-slate-400 mt-1 font-medium"
+      >
+        Beat the Time & Speed Challenge Mode
+      </p>
+    </header>
+
+    <main
+      class="w-full max-w-3xl flex-1 flex flex-col justify-center items-center"
+    >
+      <!-- ================= 1. SETUP SCREEN ================= -->
+      <div
+        id="setupScreen"
+        class="w-full glass-card rounded-3xl p-6 sm:p-8 space-y-6"
+      >
+        <div class="text-center space-y-2">
+          <h2 class="text-2xl sm:text-3xl font-bold text-sky-300 font-display">
+            Select Game Mode & Section 🚀
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300">
+            Choose your game mode, subject category, grade level, and class
+            section.
+          </p>
+        </div>
+
+        <form id="setupForm" onsubmit="startGame(event)" class="space-y-4">
+          <!-- Game Mode Switcher -->
+          <div>
+            <label
+              class="block text-xs font-semibold uppercase text-amber-300 mb-1 tracking-wider"
+              >Select Game Mode</label
+            >
+            <div class="grid grid-cols-2 gap-3">
+              <label class="cursor-pointer">
+                <input
+                  type="radio"
+                  name="gameModeSelect"
+                  value="timeAttack"
+                  checked
+                  onchange="onGameModeChange()"
+                  class="peer hidden"
+                />
+                <div
+                  class="p-3 bg-slate-800/90 border-2 border-slate-700 rounded-xl peer-checked:border-amber-400 peer-checked:bg-amber-500/20 text-center transition"
+                >
+                  <i
+                    class="fa-solid fa-stopwatch text-amber-400 text-lg mb-1 block"
+                  ></i>
+                  <span class="text-xs font-bold block text-white"
+                    >Beat the Time</span
+                  >
+                  <span class="text-[10px] text-slate-400 block"
+                    >Classic Quiz Mode</span
+                  >
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input
+                  type="radio"
+                  name="gameModeSelect"
+                  value="speedChallenge"
+                  onchange="onGameModeChange()"
+                  class="peer hidden"
+                />
+                <div
+                  class="p-3 bg-slate-800/90 border-2 border-slate-700 rounded-xl peer-checked:border-pink-500 peer-checked:bg-pink-500/20 text-center transition"
+                >
+                  <i
+                    class="fa-solid fa-rocket text-pink-400 text-lg mb-1 block"
+                  ></i>
+                  <span class="text-xs font-bold block text-white"
+                    >Speed Challenge</span
+                  >
+                  <span class="text-[10px] text-slate-400 block"
+                    >Asteroid Laser Blaster • Max 100 Points</span
+                  >
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-semibold uppercase text-slate-300 mb-1"
+              >1. Subject Category</label
+            >
+            <select
+              id="categorySelect"
+              required
+              class="w-full px-4 py-3 bg-slate-800/90 border border-slate-600/60 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none text-white text-sm cursor-pointer"
+            ></select>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-semibold uppercase text-slate-300 mb-1"
+              >2. Grade Level</label
+            >
+            <select
+              id="gradeSelect"
+              required
+              onchange="onSetupGradeChange()"
+              class="w-full px-4 py-3 bg-slate-800/90 border border-slate-600/60 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none text-white text-sm cursor-pointer"
+            ></select>
+          </div>
+
+          <div>
+            <label
+              class="block text-xs font-semibold uppercase text-slate-300 mb-1"
+              >3. Class / Group Section</label
+            >
+            <select
+              id="classSelect"
+              required
+              class="w-full px-4 py-3 bg-slate-800/90 border border-slate-600/60 rounded-xl focus:ring-2 focus:ring-amber-400 focus:outline-none text-white text-sm cursor-pointer"
+            ></select>
+          </div>
+
+          <!-- Volume Controls in Setup -->
+          <div
+            class="p-3 bg-slate-900/80 rounded-2xl border border-slate-700/80 flex items-center justify-between gap-3"
+          >
+            <div
+              class="flex items-center gap-2 text-xs font-semibold text-slate-300"
+            >
+              <i
+                id="setupVolIcon"
+                class="fa-solid fa-volume-high text-amber-400"
+              ></i>
+              <span>Background Music & Sound FX Volume</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input
+                id="setupVolumeSlider"
+                type="range"
+                min="0"
+                max="100"
+                value="50"
+                oninput="updateMasterVolume(this.value)"
+                class="w-24 accent-amber-400 cursor-pointer"
+              />
+              <span
+                id="setupVolValue"
+                class="text-xs font-mono font-bold text-amber-300 w-8 text-right"
+                >50%</span
+              >
+            </div>
+          </div>
+
+          <div
+            id="modeDescriptionBox"
+            class="p-4 bg-sky-500/10 border border-sky-500/20 rounded-2xl flex items-start gap-3"
+          >
+            <i class="fa-solid fa-circle-info text-sky-400 text-lg mt-0.5"></i>
+            <p
+              id="modeDescText"
+              class="text-xs text-sky-200/90 leading-relaxed"
+            >
+              <strong>Beat the Time:</strong> Read the prompt, then click
+              <span class="text-sky-300 font-bold">"Reveal Answer"</span>
+              to reveal the answer. Click
+              <span class="text-sky-300 font-bold">"FINISH GAME"</span> anytime
+              to save your completion time!
+            </p>
+          </div>
+
+          <div class="flex gap-2">
+            <button
+              type="submit"
+              class="game-btn flex-1 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 font-bold text-lg rounded-2xl shadow-lg shadow-emerald-500/30 text-white tracking-wide flex justify-center items-center gap-2"
+            >
+              <i class="fa-solid fa-play"></i> START GAME NOW
+            </button>
+
+            <button
+              id="leaderboardBtn"
+              type="button"
+              onclick="showLeaderboardView()"
+              class="game-btn px-4 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-2xl text-sky-300 font-semibold text-sm flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <i id="leaderboardIcon" class="fa-solid fa-trophy"></i>
+            </button>
+
+            <button
+              type="button"
+              onclick="showGradeManagerView()"
+              class="game-btn px-4 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-2xl text-teal-300 font-semibold text-sm flex items-center justify-center gap-1.5"
+              title="Add Grade Level & Classes"
+            >
+              <i class="fa-solid fa-user-gear"></i>
+            </button>
+
+            <button
+              type="button"
+              onclick="showAdminView()"
+              class="game-btn px-4 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-2xl text-slate-300 font-semibold text-sm flex items-center justify-center gap-1.5"
+              title="Manage Questions"
+            >
+              <i class="fa-solid fa-gear"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ================= 2. GAMEPLAY SCREEN ================= -->
+      <div
+        id="gameScreen"
+        class="hidden w-full glass-card rounded-3xl p-6 sm:p-8 space-y-6"
+      >
+        <!-- Top Info Header -->
+        <div
+          class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-700/60"
+        >
+          <div>
+            <span
+              id="currentClassBadge"
+              class="px-3 py-1 bg-amber-500/20 text-amber-300 text-xs font-extrabold rounded-full border border-amber-500/30"
+            >
+              Section 7-A
+            </span>
+            <span
+              id="currentCategoryBadge"
+              class="ml-2 text-xs text-slate-400 font-medium"
+            >
+              Science Grade 7
+            </span>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <!-- Time Attack Timer Box -->
+            <div
+              id="timeAttackTimerBox"
+              class="flex items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-amber-500/40"
+            >
+              <i class="fa-solid fa-stopwatch text-amber-400"></i>
+              <span
+                id="timerDisplay"
+                class="font-mono font-bold text-amber-300 text-lg"
+                >00:00.0</span
+              >
+            </div>
+
+            <!-- Score Box -->
+            <div
+              id="scoreBox"
+              class="relative flex items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700"
+            >
+              <i class="fa-solid fa-star text-amber-400"></i>
+              <span
+                id="scoreDisplay"
+                class="font-mono font-bold text-white text-lg"
+                >0</span
+              >
+              <span class="text-xs text-slate-400">pts</span>
+
+              <!-- FLOATING TEXT ANIMATION CONTAINER -->
+              <div
+                id="floatingPointContainer"
+                class="absolute -top-6 right-2 pointer-events-none"
+              ></div>
+            </div>
+
+            <!-- In-game Volume Adjustment Toggle -->
+            <div
+              class="flex items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-700"
+            >
+              <i
+                id="gameVolIcon"
+                class="fa-solid fa-volume-high text-amber-400 cursor-pointer"
+                onclick="toggleMute()"
+              ></i>
+              <input
+                id="gameVolumeSlider"
+                type="range"
+                min="0"
+                max="100"
+                value="50"
+                oninput="updateMasterVolume(this.value)"
+                class="w-16 sm:w-20 accent-amber-400 cursor-pointer"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- SPEED CHALLENGE ROCKET CANVAS -->
+        <div
+          id="speedCanvasContainer"
+          class="hidden relative w-full h-44 rounded-2xl overflow-hidden border border-pink-500/40 bg-slate-950 shadow-2xl"
+        >
+          <canvas id="rocketCanvas" class="w-full h-full block"></canvas>
+          <div
+            id="collisionAlert"
+            class="hidden absolute inset-0 bg-pink-600/20 border-2 border-pink-500 rounded-2xl flex items-center justify-center pointer-events-none animate-pulse"
+          >
+            <span
+              class="px-3 py-1 bg-pink-600 text-white font-extrabold text-xs rounded-full shadow-lg"
+            >
+              🚨 ASTEROID SWARM IMPACT! BLAST NOW (+5 BONUS)
+            </span>
+          </div>
+        </div>
+
+        <!-- Question Prompt Box -->
+        <div
+          class="p-6 bg-slate-800/80 rounded-2xl border border-slate-700 space-y-4"
+        >
+          <div
+            class="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider"
+          >
+            <span id="questionCounter">Question 1 of 10</span>
+            <span id="pointsValueBadge" class="text-amber-400">+2 Points</span>
+          </div>
+
+          <!-- Question Image Display Area -->
+          <div
+            id="questionImageContainer"
+            class="hidden flex justify-center py-2"
+          >
+            <img
+              id="questionImage"
+              src=""
+              alt="Question Image"
+              class="max-h-48 rounded-xl border border-slate-700 object-contain shadow-md"
+              onerror="
+                this.src =
+                  'https://placehold.co/400x200/1e293b/f59e0b?text=Image+Not+Found'
+              "
+            />
+          </div>
+
+          <div
+            id="questionPrompt"
+            class="text-lg sm:text-xl font-semibold text-white leading-relaxed min-h-[60px] flex items-center"
+          >
+            Loading Question...
+          </div>
+
+          <!-- Answer Container -->
+          <div
+            id="answerBox"
+            class="hidden p-4 bg-emerald-950/40 border border-emerald-500/40 rounded-xl space-y-1"
+          >
+            <span
+              class="text-[10px] font-bold uppercase tracking-widest text-emerald-400 block"
+              >Correct Answer:</span
+            >
+            <p
+              id="answerText"
+              class="text-base sm:text-lg font-bold text-emerald-200"
+            ></p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            id="revealBtn"
+            onclick="revealAnswerAndMark()"
+            class="game-btn flex-1 py-3.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold rounded-xl shadow-lg shadow-amber-500/20 text-sm flex justify-center items-center gap-2"
+          >
+            <i class="fa-solid fa-bolt"></i> Reveal Answer & Fire Laser!
+          </button>
+
+          <button
+            id="skipBtn"
+            onclick="skipQuestion()"
+            class="game-btn px-4 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 font-semibold text-slate-300 rounded-xl text-sm flex justify-center items-center gap-2"
+          >
+            <i class="fa-solid fa-forward"></i> Skip
+          </button>
+
+          <button
+            id="finishBtn"
+            onclick="finishGameManual()"
+            class="game-btn px-4 py-3.5 bg-rose-600/80 hover:bg-rose-500 font-bold text-white rounded-xl text-sm flex justify-center items-center gap-2"
+          >
+            <i class="fa-solid fa-flag-checkered"></i> Finish Game
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= 3. SUMMARY SCREEN ================= -->
+      <div
+        id="summaryScreen"
+        class="hidden w-full glass-card rounded-3xl p-6 sm:p-8 space-y-6 text-center"
+      >
+        <div
+          class="relative w-24 h-24 mx-auto flex items-center justify-center"
+        >
+          <div
+            class="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 blur-lg opacity-60 animate-pulse"
+          ></div>
+          <div
+            class="relative w-20 h-20 rounded-full bg-slate-950 border-2 border-amber-400 flex items-center justify-center text-amber-400 text-3xl shadow-xl animate-bounce"
+          >
+            <i class="fa-solid fa-rocket transform -rotate-45"></i>
+          </div>
+        </div>
+
+        <div>
+          <h2
+            class="text-2xl sm:text-3xl font-extrabold text-amber-300 font-display"
+          >
+            Well Done!
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-300 mt-1">
+            Here is the final result recorded for your section.
+          </p>
+        </div>
+
+        <div
+          class="p-6 bg-slate-900/90 border border-slate-700/80 rounded-2xl max-w-sm mx-auto space-y-3"
+        >
+          <div>
+            <span
+              class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block"
+              >Class Section</span
+            >
+            <span id="summaryClass" class="text-lg font-bold text-white"
+              >Section A</span
+            >
+          </div>
+
+          <!-- Metric Display for Elapsed Time (Time Attack Mode Only) -->
+          <div id="summaryTimeBox" class="pt-3 border-t border-slate-800">
+            <span
+              class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block"
+              >Completion Time</span
+            >
+            <span
+              id="summaryTimeValue"
+              class="text-2xl font-bold text-amber-300 font-mono"
+              >00:00.0</span
+            >
+          </div>
+
+          <!-- Metric Display for Final Score Points -->
+          <div id="summaryScoreBox" class="pt-3 border-t border-slate-800">
+            <span
+              class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block"
+              >Final Score</span
+            >
+            <span
+              id="summaryMetricValue"
+              class="text-3xl font-extrabold text-emerald-400 font-mono"
+              >0 pts</span
+            >
+          </div>
+        </div>
+
+        <div class="max-w-sm mx-auto space-y-2 text-left">
+          <span
+            class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block px-1"
+          >
+            <i class="fa-solid fa-clock-rotate-left mr-1"></i> Recent Run Log
+          </span>
+          <div
+            id="pastScoresLog"
+            class="p-3 bg-slate-950/70 border border-slate-800 rounded-2xl space-y-1.5 max-h-36 overflow-y-auto text-xs"
+          >
+            <!-- Dynamic Run History Items -->
+          </div>
+        </div>
+
+        <button
+          onclick="resetToSetup()"
+          class="game-btn w-full max-w-sm mx-auto py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-bold rounded-xl shadow-lg text-sm"
+        >
+          Play Again
+        </button>
+      </div>
+
+      <!-- ================= 4. LEADERBOARD SCREEN ================= -->
+      <div
+        id="leaderboardScreen"
+        class="hidden w-full glass-card rounded-3xl p-6 sm:p-8 space-y-6"
+      >
+        <div class="flex items-center justify-between">
+          <h2
+            id="leaderboardTitle"
+            class="text-xl sm:text-2xl font-bold text-amber-300 font-display flex items-center gap-2"
+          >
+            <i
+              id="leaderboardHeaderIcon"
+              class="fa-solid fa-trophy text-amber-400"
+            ></i>
+            Group Leaderboards
+          </h2>
+          <button
+            onclick="resetToSetup()"
+            class="text-xs text-slate-400 hover:text-white flex items-center gap-1"
+          >
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
+
+        <div
+          id="leaderboardList"
+          class="space-y-3 max-h-[350px] overflow-y-auto pr-1"
+        >
+          <!-- Dynamic content -->
+        </div>
+
+        <button
+          onclick="resetToSetup()"
+          class="game-btn w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 font-semibold text-xs rounded-xl text-white"
+        >
+          Back to Home
+        </button>
+      </div>
+
+      <!-- ================= 5. GRADE & CLASS MANAGER SCREEN ================= -->
+      <div
+        id="gradeManagerScreen"
+        class="hidden w-full glass-card rounded-3xl p-6 sm:p-8 space-y-6"
+      >
+        <div class="flex items-center justify-between">
+          <h2
+            class="text-xl sm:text-2xl font-bold text-teal-300 font-display flex items-center gap-2"
+          >
+            <i class="fa-solid fa-user-gear text-teal-400"></i> Manage Grade
+            Levels & Classes
+          </h2>
+          <button
+            onclick="resetToSetup()"
+            class="text-xs text-slate-400 hover:text-white"
+          >
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
+
+        <div
+          class="p-4 bg-slate-800/80 rounded-2xl border border-slate-700 space-y-3"
+        >
+          <h3 class="text-xs font-bold text-teal-300 uppercase tracking-wider">
+            Add Grade Level & Class Section
+          </h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <form onsubmit="addNewGradeLevel(event)" class="space-y-2">
+              <input
+                id="adminNewGradeInput"
+                type="text"
+                placeholder="New Grade Level (e.g. Grade 10)"
+                required
+                class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+              />
+              <button
+                type="submit"
+                class="w-full py-2 bg-sky-500 hover:bg-sky-400 font-bold text-slate-950 text-xs rounded-xl shadow"
+              >
+                + Add Grade Level
+              </button>
+            </form>
+
+            <form onsubmit="addNewClassSection(event)" class="space-y-2">
+              <select
+                id="adminSelectGradeForClass"
+                required
+                class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+              ></select>
+              <input
+                id="adminNewClassInput"
+                type="text"
+                placeholder="New Class (e.g. 10-A)"
+                required
+                class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+              />
+              <button
+                type="submit"
+                class="w-full py-2 bg-teal-500 hover:bg-teal-400 font-bold text-slate-950 text-xs rounded-xl shadow"
+              >
+                + Add Class Section
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <button
+          onclick="resetToSetup()"
+          class="game-btn w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 font-semibold text-xs rounded-xl text-white"
+        >
+          Back to Home
+        </button>
+      </div>
+
+      <!-- ================= 6. ADMIN / QUESTION MANAGEMENT SCREEN ================= -->
+      <div
+        id="adminScreen"
+        class="hidden w-full glass-card rounded-3xl p-6 sm:p-8 space-y-6"
+      >
+        <div class="flex items-center justify-between">
+          <h2
+            class="text-xl sm:text-2xl font-bold text-amber-300 font-display flex items-center gap-2"
+          >
+            <i class="fa-solid fa-gear text-amber-400"></i> Manage Questions &
+            Categories
+          </h2>
+          <button
+            onclick="resetToSetup()"
+            class="text-xs text-slate-400 hover:text-white"
+          >
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
+
+        <!-- Import / Export Controls -->
+        <div
+          class="flex items-center justify-between p-3 bg-slate-900/80 rounded-2xl border border-slate-700 gap-2"
+        >
+          <span class="text-xs font-bold text-slate-300">Questions Data:</span>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              onclick="exportQuestionsJSON()"
+              class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-download"></i> Export JSON
+            </button>
+            <label
+              class="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-xl shadow flex items-center gap-1.5 cursor-pointer"
+            >
+              <i class="fa-solid fa-upload"></i> Import JSON
+              <input
+                type="file"
+                accept=".json"
+                onchange="importQuestionsJSON(event)"
+                class="hidden"
+              />
+            </label>
+          </div>
+        </div>
+
+        <!-- Add Subject Category Form -->
+        <form
+          onsubmit="addNewCategory(event)"
+          class="p-4 bg-slate-800/80 rounded-2xl border border-slate-700 space-y-2"
+        >
+          <h3 class="text-xs font-bold text-amber-300 uppercase tracking-wider">
+            Add Subject Category
+          </h3>
+          <div class="flex gap-2">
+            <input
+              id="adminNewCategoryInput"
+              type="text"
+              placeholder="New Category Name (e.g. Science Grade 5)"
+              required
+              class="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+            />
+            <button
+              type="submit"
+              class="px-4 py-2 bg-amber-500 hover:bg-amber-400 font-bold text-slate-950 text-xs rounded-xl shadow"
+            >
+              + Add Category
+            </button>
+          </div>
+        </form>
+
+        <!-- Add Question Form -->
+        <form
+          onsubmit="addNewQuestion(event)"
+          class="space-y-3 p-4 bg-slate-800/80 rounded-2xl border border-slate-700"
+        >
+          <h3 class="text-xs font-bold text-amber-300 uppercase tracking-wider">
+            Add New Question
+          </h3>
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1"
+              >Subject Category</label
+            >
+            <select
+              id="adminCategory"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+            ></select>
+          </div>
+          <input
+            id="adminPrompt"
+            type="text"
+            placeholder="Question Prompt"
+            required
+            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+          />
+          <input
+            id="adminAnswer"
+            type="text"
+            placeholder="Correct Answer"
+            required
+            class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white"
+          />
+
+          <!-- Hidden Field for storing final image data -->
+          <input type="hidden" id="adminImage" value="" />
+
+          <div class="space-y-2">
+            <label
+              class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider"
+              >Question Image Selection (Optional)</label
+            >
+            <select
+              id="adminImageDropdown"
+              onchange="onImageDropdownChange(this.value)"
+              class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white cursor-pointer"
+            >
+              <option value="">-- No Image / Select Preset --</option>
+              <option
+                value="https://placehold.co/400x200/1e293b/38bdf8?text=Oxygen+Element+(O)"
+              >
+                Oxygen Element (O)
+              </option>
+              <option
+                value="https://placehold.co/400x200/1e293b/ef4444?text=Planet+Mars"
+              >
+                Planet Mars
+              </option>
+              <option
+                value="https://placehold.co/400x200/1e293b/22c55e?text=Photosynthesis"
+              >
+                Photosynthesis Diagram
+              </option>
+              <option
+                value="https://placehold.co/400x200/1e293b/eab308?text=Eiffel+Tower+Paris"
+              >
+                Eiffel Tower Paris
+              </option>
+              <option
+                value="https://placehold.co/400x200/1e293b/a855f7?text=Math+Equation"
+              >
+                Math Equation Graphic
+              </option>
+            </select>
+
+            <!-- Image Drag and Drop / File Upload Zone -->
+            <div
+              id="dropZone"
+              class="border-2 border-dashed border-slate-600 hover:border-amber-400 bg-slate-900/60 rounded-xl p-4 text-center cursor-pointer transition-colors relative"
+              ondragover="handleDragOver(event)"
+              ondragleave="handleDragLeave(event)"
+              ondrop="handleDrop(event)"
+              onclick="document.getElementById('fileInput').click()"
+            >
+              <input
+                id="fileInput"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                onchange="handleFileSelect(event)"
+              />
+              <div id="dropZoneContent" class="space-y-1">
+                <i
+                  class="fa-solid fa-cloud-arrow-up text-amber-400 text-xl"
+                ></i>
+                <p class="text-xs text-slate-300 font-medium">
+                  Drag & drop image here, or
+                  <span class="text-amber-400 underline">browse file</span>
+                </p>
+                <p class="text-[10px] text-slate-500">Supports PNG, JPG, GIF</p>
+              </div>
+              <div
+                id="imagePreviewContainer"
+                class="hidden mt-2 relative inline-block"
+              >
+                <img
+                  id="imagePreview"
+                  src=""
+                  alt="Preview"
+                  class="max-h-28 rounded-lg mx-auto border border-slate-700 object-contain shadow"
+                />
+                <button
+                  type="button"
+                  onclick="clearUploadedImage(event)"
+                  class="absolute -top-2 -right-2 bg-rose-600 text-white rounded-full w-5 h-5 text-[10px] flex items-center justify-center shadow hover:bg-rose-500"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 font-bold text-slate-950 text-xs rounded-xl shadow"
+          >
+            + Add Question
+          </button>
+        </form>
+
+        <div
+          id="adminQuestionList"
+          class="space-y-2 max-h-[180px] overflow-y-auto pr-1"
+        >
+          <!-- Questions rendered dynamically -->
+        </div>
+      </div>
+    </main>
+
+    <!-- ================= DETHRONE / CHAMPION MODAL ================= -->
+    <div
+      id="dethroneModal"
+      class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="w-full max-w-md glass-card-amber rounded-3xl p-6 text-center space-y-5 border border-amber-500/40 shadow-2xl relative overflow-hidden"
+      >
+        <div>
+          <span
+            id="modalHeaderBadge"
+            class="px-3 py-1 bg-amber-500/20 text-amber-300 text-[11px] font-extrabold uppercase rounded-full border border-amber-500/30"
+          >
+            Grade Leaderboard Update
+          </span>
+          <h2
+            id="modalTitle"
+            class="text-2xl sm:text-3xl font-extrabold text-amber-300 font-display mt-2"
+          >
+            RECORD DETHRONED!
+          </h2>
+        </div>
+
+        <div
+          class="relative w-28 h-28 mx-auto flex items-center justify-center"
+        >
+          <div
+            class="absolute -top-3 z-10 text-amber-400 text-2xl drop-shadow-md animate-bounce"
+          >
+            <i class="fa-solid fa-crown"></i>
+          </div>
+          <div
+            class="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 blur-md opacity-70 animate-pulse"
+          ></div>
+          <div
+            class="relative w-24 h-24 rounded-full bg-slate-900 border-4 border-amber-400 flex items-center justify-center text-amber-300 text-center font-extrabold text-xs p-2 shadow-inner"
+          >
+            <span id="modalGroupNameInCircle" class="leading-tight"
+              >Section 7-A</span
+            >
+          </div>
+        </div>
+
+        <div
+          class="p-4 bg-slate-900/90 border border-amber-500/30 rounded-2xl space-y-2"
+        >
+          <p
+            id="modalDescription"
+            class="text-xs text-slate-200 leading-relaxed"
+          >
+            Class section set a new top record for this group!
+          </p>
+          <div
+            class="pt-2 border-t border-slate-800 flex justify-around text-xs"
+          >
+            <div id="modalTimeBox">
+              <span class="text-slate-400 block text-[10px]">Record Time</span>
+              <span id="modalTimeVal" class="font-bold text-amber-300 font-mono"
+                >00:00.0</span
+              >
+            </div>
+            <div id="modalScoreContainer">
+              <span class="text-slate-400 block text-[10px]">Score</span>
+              <span
+                id="modalScoreVal"
+                class="font-bold text-emerald-400 font-mono"
+                >10 pts</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <button
+          onclick="closeModalAndShowSummary()"
+          class="game-btn w-full py-3.5 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-extrabold text-sm rounded-xl shadow-lg shadow-amber-500/20"
+        >
+          CONTINUE
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= GAME LOGIC SCRIPT ================= -->
+    <script>
+      // --- DATA STORES ---
+      const CATEGORIES = [];
+
+      let gradeClassesData = {
+        "Grade 3": ["3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "3-7"],
+        "Grade 4": ["4-1", "4-2", "4-4", "4-4", "4-5", "4-6", "4-7"],
+        "Grade 5": ["5-1", "5-2", "5-3", "5-4", "5-5", "5-6", "5-7"],
+        "Grade 6": ["6-1", "6-2", "6-3", "6-4", "6-5", "6-6", "6-7"],
+        "Grade 7": ["7-1", "7-2", "7-7", "7-4", "7-5", "7-6", "7-7"],
+        "Grade 8": ["8-1", "8-2", "8-8", "8-4", "8-5", "8-6", "8-7"],
+        "Grade 9": ["9-1", "9-2", "9-9", "9-4", "9-5", "9-6", "9-7"],
+      };
+
+      let defaultQuestions = [];
+
+      let groupRecords = {};
+      let speedChallengeHistory = [];
+      let runHistoryLog = [];
+
+      let currentMode = "timeAttack";
+      let selectedCategory = "";
+      let selectedGrade = "";
+      let selectedClass = "";
+
+      let currentQuestions = [];
+      let questionIndex = 0;
+      let score = 0;
+
+      let timerInterval = null;
+      let startTime = 0;
+      let elapsedTime = 0;
+
+      let speedPointInterval = null;
+
+      let canvas, ctx;
+      let rocketY = 0.5;
+      let laserBeams = [];
+      let asteroids = [];
+      let explosions = [];
+      let isAsteroidImpact = false;
+      let animFrameId = null;
+
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      let masterVolume = 0.5;
+      let isMuted = false;
+      let bgmInterval = null;
+      let bgmStep = 0;
+
+      function updateMasterVolume(val) {
+        masterVolume = parseFloat(val) / 100;
+        isMuted = masterVolume === 0;
+
+        const volValSetup = document.getElementById("setupVolValue");
+        const setupSlider = document.getElementById("setupVolumeSlider");
+        const gameSlider = document.getElementById("gameVolumeSlider");
+        const setupIcon = document.getElementById("setupVolIcon");
+        const gameIcon = document.getElementById("gameVolIcon");
+
+        if (volValSetup) volValSetup.innerText = `${Math.round(val)}%`;
+        if (setupSlider) setupSlider.value = val;
+        if (gameSlider) gameSlider.value = val;
+
+        const iconClass = isMuted
+          ? "fa-solid fa-volume-xmark text-slate-500 cursor-pointer"
+          : masterVolume < 0.4
+            ? "fa-solid fa-volume-low text-amber-400 cursor-pointer"
+            : "fa-solid fa-volume-high text-amber-400 cursor-pointer";
+
+        if (setupIcon) setupIcon.className = iconClass;
+        if (gameIcon) gameIcon.className = iconClass;
+      }
+
+      function toggleMute() {
+        if (masterVolume > 0) {
+          updateMasterVolume(0);
+        } else {
+          updateMasterVolume(50);
+        }
+      }
+
+      function startBGM(mode) {
+        stopBGM();
+        bgmStep = 0;
+        const tempo = mode === "speedChallenge" ? 180 : 220;
+        const timeAttackMelody = [
+          261.63, 329.63, 392.0, 523.25, 392.0, 329.63, 261.63, 196.0,
+        ];
+        const speedMelody = [
+          146.83, 146.83, 293.66, 146.83, 174.61, 220.0, 196.0, 164.81,
+        ];
+
+        bgmInterval = setInterval(() => {
+          if (isMuted || masterVolume <= 0) return;
+          try {
+            if (audioCtx.state === "suspended") audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            if (mode === "speedChallenge") {
+              osc.type = "sawtooth";
+              const note = speedMelody[bgmStep % speedMelody.length];
+              osc.frequency.setValueAtTime(note, now);
+              gain.gain.setValueAtTime(0.04 * masterVolume, now);
+              gain.gain.exponentialRampToValueAtTime(
+                0.001 * masterVolume,
+                now + 0.15,
+              );
+            } else {
+              osc.type = "triangle";
+              const note = timeAttackMelody[bgmStep % timeAttackMelody.length];
+              osc.frequency.setValueAtTime(note, now);
+              gain.gain.setValueAtTime(0.06 * masterVolume, now);
+              gain.gain.exponentialRampToValueAtTime(
+                0.001 * masterVolume,
+                now + 0.18,
+              );
+            }
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.2);
+            bgmStep++;
+          } catch (e) {}
+        }, tempo);
+      }
+
+      function stopBGM() {
+        if (bgmInterval) {
+          clearInterval(bgmInterval);
+          bgmInterval = null;
+        }
+      }
+
+      function playChimeSound() {
+        if (isMuted || masterVolume <= 0) return;
+        try {
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          const now = audioCtx.currentTime;
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, now + index * 0.08);
+            gain.gain.setValueAtTime(0, now + index * 0.08);
+            gain.gain.linearRampToValueAtTime(
+              0.15 * masterVolume,
+              now + index * 0.08 + 0.02,
+            );
+            gain.gain.exponentialRampToValueAtTime(
+              0.001 * masterVolume,
+              now + index * 0.08 + 0.4,
+            );
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + index * 0.08);
+            osc.stop(now + index * 0.08 + 0.45);
+          });
+        } catch (e) {}
+      }
+
+      function playLaserSound() {
+        if (isMuted || masterVolume <= 0) return;
+        try {
+          if (audioCtx.state === "suspended") audioCtx.resume();
+          const now = audioCtx.currentTime;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+          gain.gain.setValueAtTime(0.2 * masterVolume, now);
+          gain.gain.exponentialRampToValueAtTime(
+            0.01 * masterVolume,
+            now + 0.2,
+          );
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } catch (e) {}
+      }
+
+      function initDropdowns() {
+        const catSelect = document.getElementById("categorySelect");
+        const gradeSelect = document.getElementById("gradeSelect");
+        const adminCat = document.getElementById("adminCategory");
+
+        if (catSelect)
+          catSelect.innerHTML = CATEGORIES.map(
+            (c) => `<option value="${c}">${c}</option>`,
+          ).join("");
+
+        const gradeKeys = Object.keys(gradeClassesData);
+        if (gradeSelect) {
+          gradeSelect.innerHTML = gradeKeys
+            .map((g) => `<option value="${g}">${g}</option>`)
+            .join("");
+        }
+
+        if (adminCat)
+          adminCat.innerHTML = CATEGORIES.map(
+            (c) => `<option value="${c}">${c}</option>`,
+          ).join("");
+
+        onSetupGradeChange();
+        populateAdminGradeClassSelect();
+      }
+
+      function addNewCategory(e) {
+        if (e) e.preventDefault();
+        const catInput = document.getElementById("adminNewCategoryInput");
+        if (!catInput) return;
+
+        const val = catInput.value.trim();
+        if (val && !CATEGORIES.includes(val)) {
+          CATEGORIES.push(val);
+          catInput.value = "";
+          initDropdowns();
+          alert(`Subject Category "${val}" successfully added!`);
+        } else if (CATEGORIES.includes(val)) {
+          alert("Subject Category already exists!");
+        }
+      }
+
+      function onSetupGradeChange() {
+        const gradeSelect = document.getElementById("gradeSelect");
+        const classSelect = document.getElementById("classSelect");
+        if (!gradeSelect || !classSelect) return;
+
+        const currentGrade = gradeSelect.value;
+        const classes = gradeClassesData[currentGrade] || [];
+
+        if (classes.length > 0) {
+          classSelect.innerHTML = classes
+            .map((cl) => `<option value="${cl}">${cl}</option>`)
+            .join("");
+        } else {
+          classSelect.innerHTML = `<option value="">No Classes Found</option>`;
+        }
+      }
+
+      function populateAdminGradeClassSelect() {
+        const adminSelectGrade = document.getElementById(
+          "adminSelectGradeForClass",
+        );
+        if (adminSelectGrade) {
+          const gradeKeys = Object.keys(gradeClassesData);
+          adminSelectGrade.innerHTML = gradeKeys
+            .map((g) => `<option value="${g}">${g}</option>`)
+            .join("");
+        }
+      }
+
+      function addNewGradeLevel(e) {
+        if (e) e.preventDefault();
+        const newGradeInput = document.getElementById("adminNewGradeInput");
+        if (!newGradeInput) return;
+
+        const val = newGradeInput.value.trim();
+        if (val && !gradeClassesData[val]) {
+          gradeClassesData[val] = [];
+          newGradeInput.value = "";
+          initDropdowns();
+          alert(`Grade Level "${val}" successfully added!`);
+        } else if (gradeClassesData[val]) {
+          alert("Grade Level already exists!");
+        }
+      }
+
+      function addNewClassSection(e) {
+        if (e) e.preventDefault();
+        const gradeSelect = document.getElementById("adminSelectGradeForClass");
+        const newClassInput = document.getElementById("adminNewClassInput");
+        if (!gradeSelect || !newClassInput) return;
+
+        const selectedGrade = gradeSelect.value;
+        const newClass = newClassInput.value.trim();
+
+        if (selectedGrade && newClass) {
+          if (!gradeClassesData[selectedGrade]) {
+            gradeClassesData[selectedGrade] = [];
+          }
+          if (!gradeClassesData[selectedGrade].includes(newClass)) {
+            gradeClassesData[selectedGrade].push(newClass);
+            newClassInput.value = "";
+            initDropdowns();
+            alert(`Class "${newClass}" added to ${selectedGrade}!`);
+          } else {
+            alert("Class Section already exists in this Grade Level!");
+          }
+        }
+      }
+
+      function resetToSetup() {
+        clearInterval(timerInterval);
+        clearInterval(speedPointInterval);
+        stopBGM();
+
+        const setup = document.getElementById("setupScreen");
+        const game = document.getElementById("gameScreen");
+        const summary = document.getElementById("summaryScreen");
+        const leaderboard = document.getElementById("leaderboardScreen");
+        const gradeManager = document.getElementById("gradeManagerScreen");
+        const admin = document.getElementById("adminScreen");
+
+        if (setup) setup.classList.remove("hidden");
+        if (game) game.classList.add("hidden");
+        if (summary) summary.classList.add("hidden");
+        if (leaderboard) leaderboard.classList.add("hidden");
+        if (gradeManager) gradeManager.classList.add("hidden");
+        if (admin) admin.classList.add("hidden");
+      }
+
+      function showLeaderboardView() {
+        const setup = document.getElementById("setupScreen");
+        const leaderboard = document.getElementById("leaderboardScreen");
+        if (setup) setup.classList.add("hidden");
+        if (leaderboard) leaderboard.classList.remove("hidden");
+
+        const lbTitle = document.getElementById("leaderboardTitle");
+
+        if (currentMode === "speedChallenge") {
+          if (lbTitle)
+            lbTitle.innerHTML = `<i id="leaderboardHeaderIcon" class="fa-solid fa-trophy text-pink-400"></i> Speed Challenge History Logs`;
+          renderSpeedChallengeHistory();
+        } else {
+          if (lbTitle)
+            lbTitle.innerHTML = `<i id="leaderboardHeaderIcon" class="fa-solid fa-trophy text-amber-400"></i> Group Leaderboards`;
+          renderLeaderboard();
+        }
+      }
+
+      function showGradeManagerView() {
+        const setup = document.getElementById("setupScreen");
+        const gradeManager = document.getElementById("gradeManagerScreen");
+        if (setup) setup.classList.add("hidden");
+        if (gradeManager) gradeManager.classList.remove("hidden");
+        populateAdminGradeClassSelect();
+      }
+
+      function showAdminView() {
+        const setup = document.getElementById("setupScreen");
+        const admin = document.getElementById("adminScreen");
+        if (setup) setup.classList.add("hidden");
+        if (admin) admin.classList.remove("hidden");
+        renderAdminQuestions();
+      }
+
+      function renderSpeedChallengeHistory() {
+        const listElem = document.getElementById("leaderboardList");
+        if (!listElem) return;
+
+        const filteredHistory = speedChallengeHistory.filter(
+          (item) => item.section === selectedClass,
+        );
+
+        if (filteredHistory.length === 0) {
+          listElem.innerHTML = `<div class="text-center text-slate-400 py-8 text-xs">No Speed Challenge history logs for section ${selectedClass} yet.</div>`;
+          return;
+        }
+
+        listElem.innerHTML = filteredHistory
+          .map((item) => {
+            return `
+          <div class="p-4 bg-slate-900/90 border border-pink-500/30 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-pink-300 block">Section: ${item.section}</span>
+              <span class="text-[10px] text-slate-400 block mt-1"><i class="fa-solid fa-calendar-days mr-1"></i>${item.date}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-bold text-emerald-400 font-mono block">${item.score} pts</span>
+            </div>
+          </div>
+        `;
+          })
+          .join("");
+      }
+
+      function renderLeaderboard() {
+        const listElem = document.getElementById("leaderboardList");
+        if (!listElem) return;
+
+        const keys = Object.keys(groupRecords);
+        if (keys.length === 0) {
+          listElem.innerHTML = `<div class="text-center text-slate-400 py-8 text-xs">No section records logged yet. Play a game to record scores!</div>`;
+          return;
+        }
+
+        listElem.innerHTML = keys
+          .map((key) => {
+            const rec = groupRecords[key];
+            const [cat, grade] = key.split("_");
+            let timeStr = "";
+            if (rec.elapsedTime) {
+              let totalSecs = rec.elapsedTime / 1000;
+              let mins = Math.floor(totalSecs / 60);
+              let secs = Math.floor(totalSecs % 60);
+              timeStr = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+            }
+
+            return `
+          <div class="p-4 bg-slate-900/90 border border-slate-700/80 rounded-2xl flex items-center justify-between">
+            <div>
+              <span class="text-xs font-bold text-amber-300 block">${cat} • ${grade}</span>
+              <span class="text-sm font-extrabold text-white">${rec.section}</span>
+            </div>
+            <div class="text-right">
+              ${timeStr ? `<span class="text-xs font-mono text-amber-300 font-bold"><i class="fa-solid fa-clock mr-1"></i>${timeStr}</span>` : ""}
+            </div>
+          </div>
+        `;
+          })
+          .join("");
+      }
+
+      function renderAdminQuestions() {
+        const listElem = document.getElementById("adminQuestionList");
+        if (!listElem) return;
+
+        listElem.innerHTML = defaultQuestions
+          .map(
+            (q, idx) => `
+        <div class="p-3 bg-slate-900/80 border border-slate-700/60 rounded-xl flex items-center justify-between text-xs">
+          <div class="truncate mr-2">
+            <span class="text-amber-400 font-bold mr-1">[${q.category}]</span>
+            <span class="text-white">${q.prompt}</span>
+            <span class="text-emerald-400 block text-[10px]">Answer: ${q.answer}</span>
+          </div>
+          <button onclick="deleteQuestion(${idx})" class="text-rose-400 hover:text-rose-300 px-2 py-1 bg-rose-500/10 rounded-lg border border-rose-500/20">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      // --- IMAGE DROPBOX & PRESET SELECTION LOGIC ---
+      function onImageDropdownChange(val) {
+        const imageInput = document.getElementById("adminImage");
+        if (imageInput) {
+          imageInput.value = val;
+          showImagePreview(val);
+        }
+      }
+
+      function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropZone = document.getElementById("dropZone");
+        if (dropZone)
+          dropZone.classList.add("border-amber-400", "bg-amber-500/10");
+      }
+
+      function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropZone = document.getElementById("dropZone");
+        if (dropZone)
+          dropZone.classList.remove("border-amber-400", "bg-amber-500/10");
+      }
+
+      function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dropZone = document.getElementById("dropZone");
+        if (dropZone)
+          dropZone.classList.remove("border-amber-400", "bg-amber-500/10");
+
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          processImageFile(e.dataTransfer.files[0]);
+        }
+      }
+
+      function handleFileSelect(e) {
+        if (e.target.files && e.target.files.length > 0) {
+          processImageFile(e.target.files[0]);
+        }
+      }
+
+      function processImageFile(file) {
+        if (!file.type.startsWith("image/")) {
+          alert("Please upload a valid image file.");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const base64Url = event.target.result;
+          const imageInput = document.getElementById("adminImage");
+          if (imageInput) imageInput.value = base64Url;
+          const dropdown = document.getElementById("adminImageDropdown");
+          if (dropdown) dropdown.value = "";
+          showImagePreview(base64Url);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function showImagePreview(url) {
+        const previewContainer = document.getElementById(
+          "imagePreviewContainer",
+        );
+        const previewImg = document.getElementById("imagePreview");
+        const content = document.getElementById("dropZoneContent");
+
+        if (url && url.trim() !== "") {
+          if (previewImg) previewImg.src = url;
+          if (previewContainer) previewContainer.classList.remove("hidden");
+          if (content) content.classList.add("hidden");
+        } else {
+          clearUploadedImage();
+        }
+      }
+
+      function clearUploadedImage(e) {
+        if (e) e.stopPropagation();
+        const imageInput = document.getElementById("adminImage");
+        const fileInput = document.getElementById("fileInput");
+        const previewContainer = document.getElementById(
+          "imagePreviewContainer",
+        );
+        const content = document.getElementById("dropZoneContent");
+        const dropdown = document.getElementById("adminImageDropdown");
+
+        if (imageInput) imageInput.value = "";
+        if (fileInput) fileInput.value = "";
+        if (dropdown) dropdown.value = "";
+        if (previewContainer) previewContainer.classList.add("hidden");
+        if (content) content.classList.remove("hidden");
+      }
+
+      function addNewQuestion(e) {
+        if (e) e.preventDefault();
+        const cat = document.getElementById("adminCategory").value;
+        const prompt = document.getElementById("adminPrompt").value;
+        const answer = document.getElementById("adminAnswer").value;
+        const image = document.getElementById("adminImage").value;
+
+        defaultQuestions.push({
+          id: Date.now(),
+          category: cat,
+          prompt: prompt,
+          answer: answer,
+          image: image || "",
+        });
+
+        document.getElementById("adminPrompt").value = "";
+        document.getElementById("adminAnswer").value = "";
+        clearUploadedImage();
+
+        renderAdminQuestions();
+      }
+
+      function deleteQuestion(index) {
+        defaultQuestions.splice(index, 1);
+        renderAdminQuestions();
+      }
+
+      // --- IMPORT / EXPORT QUESTIONS FUNCTIONS ---
+      function exportQuestionsJSON() {
+        const dataStr =
+          "data:text/json;charset=utf-8," +
+          encodeURIComponent(JSON.stringify(defaultQuestions, null, 2));
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "eduquiz_questions.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+      }
+
+      function importQuestionsJSON(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          try {
+            const importedData = JSON.parse(event.target.result);
+            if (Array.isArray(importedData)) {
+              defaultQuestions = importedData;
+              renderAdminQuestions();
+              initDropdowns();
+              alert("Questions successfully imported!");
+            } else {
+              alert("Invalid JSON format for questions.");
+            }
+          } catch (err) {
+            alert("Error parsing JSON file.");
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+      }
+
+      function onGameModeChange() {
+        const selected = document.querySelector(
+          'input[name="gameModeSelect"]:checked',
+        );
+        if (selected) {
+          currentMode = selected.value;
+          const descText = document.getElementById("modeDescText");
+          const headerSub = document.getElementById("headerSubModeTitle");
+          const lbBtn = document.getElementById("leaderboardBtn");
+          const lbIcon = document.getElementById("leaderboardIcon");
+          const ptsBadge = document.getElementById("pointsValueBadge");
+
+          if (currentMode === "speedChallenge") {
+            if (headerSub) headerSub.innerText = "Speed Challenge Mode";
+            if (ptsBadge) ptsBadge.innerText = "+2 Points";
+            if (descText)
+              descText.innerHTML = `<strong>Speed Challenge:</strong> Your rocket automatically dodges moving asteroids while starting with <span class="text-pink-300 font-bold">100 max points</span>. Points tick down (-1/s) while waiting to answer. Correct answers give <span class="text-emerald-400 font-bold">+2 Points</span> and <span class="text-pink-400 font-bold">FIRE LASERS</span> to blast obstacles!<br>ロケットは自動で動いていん石をよけます。さいしょは100点！答えを待つ間、1秒ごとに1点へります。正解すると2点ゲット！レーザーでいん石をこわそう！</br>`;
+            if (lbBtn)
+              lbBtn.className =
+                "game-btn px-4 bg-pink-950/60 border border-pink-500/40 hover:bg-pink-900/60 rounded-2xl text-pink-300 font-semibold text-sm flex items-center justify-center gap-1.5 transition-colors";
+            if (lbIcon) lbIcon.className = "fa-solid fa-trophy text-pink-400";
+          } else {
+            if (headerSub) headerSub.innerText = "Beat the Time Mode";
+            if (ptsBadge) ptsBadge.innerText = "+1 Point";
+            if (descText)
+              descText.innerHTML = `<strong>Beat the Time:</strong> Read the prompt, then click <span class="text-amber-300 font-bold">"Reveal Answer"</span> to reveal the answer. Click <span class="text-amber-300 font-bold">"FINISH GAME"</span> anytime to save your completion time!<br>ほかのクラスの時間より早くして、チャンピオンになろう！</br>`;
+            if (lbBtn)
+              lbBtn.className =
+                "game-btn px-4 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-2xl text-sky-300 font-semibold text-sm flex items-center justify-center gap-1.5 transition-colors";
+            if (lbIcon) lbIcon.className = "fa-solid fa-trophy text-amber-400";
+          }
+        }
+      }
+
+      function startGame(e) {
+        if (e) e.preventDefault();
+
+        const catElem = document.getElementById("categorySelect");
+        const gradeElem = document.getElementById("gradeSelect");
+        const classElem = document.getElementById("classSelect");
+
+        selectedCategory = catElem ? catElem.value : CATEGORIES[0];
+        selectedGrade = gradeElem
+          ? gradeElem.value
+          : Object.keys(gradeClassesData)[0];
+        selectedClass = classElem ? classElem.value : "";
+
+        currentQuestions = defaultQuestions.filter(
+          (q) => q.category === selectedCategory,
+        );
+        if (currentQuestions.length === 0) {
+          currentQuestions = [...defaultQuestions];
+        }
+
+        questionIndex = 0;
+        score = currentMode === "speedChallenge" ? 100 : 0;
+        elapsedTime = 0;
+        isAsteroidImpact = false;
+        asteroids = [];
+        laserBeams = [];
+        explosions = [];
+
+        const setup = document.getElementById("setupScreen");
+        const game = document.getElementById("gameScreen");
+        const summary = document.getElementById("summaryScreen");
+        const leaderboard = document.getElementById("leaderboardScreen");
+        const gradeManager = document.getElementById("gradeManagerScreen");
+        const admin = document.getElementById("adminScreen");
+
+        if (setup) setup.classList.add("hidden");
+        if (game) game.classList.remove("hidden");
+        if (summary) summary.classList.add("hidden");
+        if (leaderboard) leaderboard.classList.add("hidden");
+        if (gradeManager) gradeManager.classList.add("hidden");
+        if (admin) admin.classList.add("hidden");
+
+        const currentClassBadge = document.getElementById("currentClassBadge");
+        const currentCategoryBadge = document.getElementById(
+          "currentCategoryBadge",
+        );
+        if (currentClassBadge)
+          currentClassBadge.innerText = selectedClass || "Section N/A";
+        if (currentCategoryBadge)
+          currentCategoryBadge.innerText = `${selectedCategory} • ${selectedGrade}`;
+
+        const timeAttackTimerBox =
+          document.getElementById("timeAttackTimerBox");
+        const speedCanvasContainer = document.getElementById(
+          "speedCanvasContainer",
+        );
+        const scoreBox = document.getElementById("scoreBox");
+
+        startBGM(currentMode);
+
+        if (currentMode === "speedChallenge") {
+          if (timeAttackTimerBox) timeAttackTimerBox.classList.add("hidden");
+          if (speedCanvasContainer)
+            speedCanvasContainer.classList.remove("hidden");
+          if (scoreBox) scoreBox.classList.remove("hidden");
+          setTimeout(() => {
+            resizeCanvas();
+          }, 50);
+          startSpeedChallengePointsLogic();
+        } else {
+          if (timeAttackTimerBox) timeAttackTimerBox.classList.remove("hidden");
+          if (speedCanvasContainer)
+            speedCanvasContainer.classList.add("hidden");
+          if (scoreBox) scoreBox.classList.add("hidden");
+          startTimeAttackTimer();
+        }
+
+        displayCurrentQuestion();
+        updateScoreUI();
+      }
+
+      function startTimeAttackTimer() {
+        clearInterval(timerInterval);
+        clearInterval(speedPointInterval);
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+          elapsedTime = Date.now() - startTime;
+          let totalSecs = elapsedTime / 1000;
+          let mins = Math.floor(totalSecs / 60);
+          let secs = Math.floor(totalSecs % 60);
+          let ms = Math.floor((elapsedTime % 1000) / 100);
+          const display = document.getElementById("timerDisplay");
+          if (display) {
+            display.innerText = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${ms}`;
+          }
+        }, 100);
+      }
+
+      // SPEED CHALLENGE LOGIC (Deretsong bawas ng 1 pt/s nang walang delay)
+      function startSpeedChallengePointsLogic() {
+        clearInterval(timerInterval);
+        clearInterval(speedPointInterval);
+
+        speedPointInterval = setInterval(() => {
+          if (score > 0) {
+            score--;
+          }
+
+          updateScoreUI();
+
+          const alertElem = document.getElementById("collisionAlert");
+          if (score <= 10) {
+            isAsteroidImpact = true;
+            if (alertElem) alertElem.classList.remove("hidden");
+          } else {
+            isAsteroidImpact = false;
+            if (alertElem) alertElem.classList.add("hidden");
+          }
+        }, 1000);
+      }
+
+      function displayCurrentQuestion() {
+        if (questionIndex >= currentQuestions.length) {
+          questionIndex = 0;
+        }
+
+        const q = currentQuestions[questionIndex];
+        const counter = document.getElementById("questionCounter");
+        const prompt = document.getElementById("questionPrompt");
+        const answer = document.getElementById("answerText");
+
+        if (counter)
+          counter.innerText = `Question ${questionIndex + 1} of ${currentQuestions.length}`;
+        if (prompt) prompt.innerText = q.prompt;
+        if (answer) answer.innerText = q.answer;
+
+        const imgContainer = document.getElementById("questionImageContainer");
+        const imgElem = document.getElementById("questionImage");
+        if (imgContainer && imgElem) {
+          if (q.image && q.image.trim() !== "") {
+            imgElem.src = q.image;
+            imgContainer.classList.remove("hidden");
+          } else {
+            imgContainer.classList.add("hidden");
+            imgElem.src = "";
+          }
+        }
+
+        const answerBox = document.getElementById("answerBox");
+        if (answerBox) answerBox.classList.add("hidden");
+
+        updateScoreUI();
+      }
+
+      // FLOATING POINT ANIMATION FUNCTION
+      function showFloatingPointsAnimation(pointsAdded) {
+        const container = document.getElementById("floatingPointContainer");
+        if (!container) return;
+
+        const floatElem = document.createElement("div");
+        floatElem.className =
+          "text-emerald-400 font-extrabold text-lg sm:text-xl font-mono animate-float-point drop-shadow-md";
+        floatElem.innerText = `+${pointsAdded}`;
+
+        container.appendChild(floatElem);
+
+        setTimeout(() => {
+          floatElem.remove();
+        }, 1200);
+      }
+
+      function revealAnswerAndMark() {
+        const answerBox = document.getElementById("answerBox");
+        if (answerBox) answerBox.classList.remove("hidden");
+
+        playChimeSound();
+
+        try {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.7 },
+            colors: ["#f59e0b", "#10b981", "#3b82f6", "#ec4899"],
+          });
+        } catch (e) {}
+
+        if (currentMode === "speedChallenge") {
+          fireLaserCannon();
+          let added = 2; // Ginawang 2 points ang tamang sagot sa speed mode
+          if (isAsteroidImpact) {
+            added = 5; // +5 bonus kapag nakaligtas sa impact area
+          }
+          score += added;
+          showFloatingPointsAnimation(added);
+          updateScoreUI();
+        }
+
+        setTimeout(() => {
+          questionIndex++;
+          displayCurrentQuestion();
+        }, 300);
+      }
+
+      function fireLaserCannon() {
+        playLaserSound();
+        if (canvas) {
+          const rx = 60;
+          const ry = canvas.height * rocketY;
+          laserBeams.push({ x: rx + 20, y: ry, speed: 14 });
+        }
+      }
+
+      function skipQuestion() {
+        questionIndex++;
+        displayCurrentQuestion();
+      }
+
+      function updateScoreUI() {
+        const scoreElem = document.getElementById("scoreDisplay");
+        if (scoreElem) scoreElem.innerText = score;
+
+        const speedDelayStatus = document.getElementById("speedDelayStatus");
+        if (speedDelayStatus) {
+          if (currentMode === "speedChallenge") {
+            speedDelayStatus.classList.remove("hidden");
+            speedDelayStatus.innerText = `(-1 pt/s)`;
+            speedDelayStatus.className =
+              "text-[10px] text-rose-400 font-bold ml-1";
+          } else {
+            speedDelayStatus.classList.add("hidden");
+          }
+        }
+      }
+
+      function finishGameManual() {
+        clearInterval(timerInterval);
+        clearInterval(speedPointInterval);
+        stopBGM();
+
+        const currentDateStr = new Date().toLocaleString([], {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        if (currentMode === "speedChallenge") {
+          speedChallengeHistory.unshift({
+            section: selectedClass,
+            category: selectedCategory,
+            grade: selectedGrade,
+            score: score,
+            date: currentDateStr,
+          });
+          closeModalAndShowSummary();
+          return;
+        }
+
+        runHistoryLog.unshift({
+          section: selectedClass,
+          mode: currentMode,
+          time: elapsedTime,
+          date: currentDateStr,
+        });
+
+        const groupKey = `${selectedCategory}_${selectedGrade}`;
+        const existingRecord = groupRecords[groupKey];
+
+        let isNewTop = false;
+
+        if (!existingRecord) {
+          isNewTop = true;
+        } else if (elapsedTime < existingRecord.elapsedTime) {
+          isNewTop = true;
+        }
+
+        if (isNewTop) {
+          groupRecords[groupKey] = {
+            section: selectedClass,
+            elapsedTime: elapsedTime,
+            mode: currentMode,
+          };
+
+          showDethroneModal(true, selectedClass, elapsedTime, 0);
+        } else {
+          showDethroneModal(
+            false,
+            existingRecord.section,
+            existingRecord.elapsedTime,
+            0,
+          );
+        }
+      }
+
+      function showDethroneModal(isDethroned, sectionName, timeVal, scoreVal) {
+        const modal = document.getElementById("dethroneModal");
+        const title = document.getElementById("modalTitle");
+        const groupCircle = document.getElementById("modalGroupNameInCircle");
+        const desc = document.getElementById("modalDescription");
+        const timeBox = document.getElementById("modalTimeBox");
+        const timeDisp = document.getElementById("modalTimeVal");
+        const scoreContainer = document.getElementById("modalScoreContainer");
+
+        if (groupCircle) groupCircle.innerText = sectionName;
+
+        if (currentMode === "speedChallenge") {
+          if (timeBox) timeBox.classList.add("hidden");
+          if (scoreContainer) scoreContainer.classList.remove("hidden");
+        } else {
+          if (timeBox) timeBox.classList.remove("hidden");
+          if (scoreContainer) scoreContainer.classList.add("hidden");
+          let totalSecs = timeVal / 1000;
+          let mins = Math.floor(totalSecs / 60);
+          let secs = Math.floor(totalSecs % 60);
+          let formattedTime = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+          if (timeDisp) timeDisp.innerText = formattedTime;
+        }
+
+        if (title && desc) {
+          if (isDethroned) {
+            title.innerText = "NEW CHAMPION! 👑";
+            desc.innerHTML = `<strong class="text-amber-300">${sectionName}</strong> 新しいチャンピオンだ！`;
+            try {
+              confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+            } catch (e) {}
+          } else {
+            title.innerText = "UNDEFEATED CHAMPION!💪";
+            desc.innerHTML = `<strong class="text-amber-300">${sectionName}</strong>は、まだチャンピオンだ！. よくがんばったね！`;
+          }
+        }
+
+        if (modal) modal.classList.remove("hidden");
+      }
+
+      function closeModalAndShowSummary() {
+        const modal = document.getElementById("dethroneModal");
+        const game = document.getElementById("gameScreen");
+        const summary = document.getElementById("summaryScreen");
+        const sumClass = document.getElementById("summaryClass");
+        const sumTimeBox = document.getElementById("summaryTimeBox");
+        const sumTimeValue = document.getElementById("summaryTimeValue");
+        const sumScoreBox = document.getElementById("summaryScoreBox");
+        const sumValue = document.getElementById("summaryMetricValue");
+
+        if (modal) modal.classList.add("hidden");
+        if (game) game.classList.add("hidden");
+        if (summary) summary.classList.remove("hidden");
+
+        if (sumClass) sumClass.innerText = selectedClass;
+
+        if (currentMode === "speedChallenge") {
+          if (sumTimeBox) sumTimeBox.classList.add("hidden");
+          if (sumScoreBox) sumScoreBox.classList.remove("hidden");
+          if (sumValue) sumValue.innerText = `${score} pts`;
+        } else {
+          if (sumTimeBox) sumTimeBox.classList.remove("hidden");
+          if (sumScoreBox) sumScoreBox.classList.add("hidden");
+          let totalSecs = elapsedTime / 1000;
+          let mins = Math.floor(totalSecs / 60);
+          let secs = Math.floor(totalSecs % 60);
+          if (sumTimeValue)
+            sumTimeValue.innerText = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+        }
+
+        const pastLogElem = document.getElementById("pastScoresLog");
+        if (pastLogElem) {
+          if (currentMode === "speedChallenge") {
+            const classSpeedHistory = speedChallengeHistory.filter(
+              (run) => run.section === selectedClass,
+            );
+            if (classSpeedHistory.length === 0) {
+              pastLogElem.innerHTML = `<span class="text-slate-500 text-[11px]">No previous speed runs for this class yet.</span>`;
+            } else {
+              pastLogElem.innerHTML = classSpeedHistory
+                .map(
+                  (run) => `
+              <div class="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-slate-900 border border-slate-800/80">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-pink-500/20 text-pink-300">Speed</span>
+                  <span class="font-bold text-slate-200 truncate">${run.section}</span>
+                </div>
+                <div class="text-right flex items-center gap-2">
+                  <span class="font-mono text-emerald-400 font-bold">${run.score} pts</span>
+                  <span class="text-[10px] text-slate-500">${run.date}</span>
+                </div>
+              </div>
+            `,
+                )
+                .join("");
+            }
+          } else {
+            const classTimeHistory = runHistoryLog.filter(
+              (run) =>
+                run.section === selectedClass && run.mode === "timeAttack",
+            );
+            if (classTimeHistory.length === 0) {
+              pastLogElem.innerHTML = `<span class="text-slate-500 text-[11px]">No previous time runs for this class yet.</span>`;
+            } else {
+              pastLogElem.innerHTML = classTimeHistory
+                .map((run) => {
+                  let totalSecs = run.time / 1000;
+                  let mins = Math.floor(totalSecs / 60);
+                  let secs = Math.floor(totalSecs % 60);
+                  let ms = Math.floor((run.time % 1000) / 100);
+                  let timeFormatted = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${ms}`;
+                  return `
+              <div class="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-slate-900 border border-slate-800/80">
+                <div class="flex items-center gap-1.5 truncate">
+                  <span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-500/20 text-amber-300">Time</span>
+                  <span class="font-bold text-slate-200 truncate">${run.section}</span>
+                </div>
+                <div class="text-right flex items-center gap-2">
+                  <span class="font-mono text-amber-300 font-bold">${timeFormatted}</span>
+                  <span class="text-[10px] text-slate-500">${run.date}</span>
+                </div>
+              </div>
+            `;
+                })
+                .join("");
+            }
+          }
+        }
+      }
+
+      function resizeCanvas() {
+        if (canvas && canvas.parentElement) {
+          canvas.width = canvas.parentElement.clientWidth || 600;
+          canvas.height = canvas.parentElement.clientHeight || 176;
+        }
+      }
+
+      function setupCanvas() {
+        canvas = document.getElementById("rocketCanvas");
+        if (canvas) {
+          ctx = canvas.getContext("2d");
+          resizeCanvas();
+          window.addEventListener("resize", resizeCanvas);
+          renderCanvasLoop();
+        }
+      }
+
+      function renderCanvasLoop() {
+        if (canvas && ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const w = canvas.width;
+          const h = canvas.height;
+
+          ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+          for (let i = 0; i < 30; i++) {
+            let sx = (Math.sin(i * 88 + Date.now() * 0.001) * 0.5 + 0.5) * w;
+            let sy = (Math.cos(i * 22 + Date.now() * 0.001) * 0.5 + 0.5) * h;
+            ctx.fillRect(sx, sy, 2, 2);
+          }
+
+          rocketY = 0.5 + Math.sin(Date.now() * 0.003) * 0.3;
+          const rx = 60;
+          const ry = h * rocketY;
+
+          if (Math.random() < 0.08) {
+            asteroids.push({
+              x: w + 20,
+              y: Math.random() * (h - 20) + 10,
+              radius: Math.random() * 8 + 10,
+              speed: Math.random() * 2 + 3,
+            });
+          }
+
+          ctx.fillStyle = "#f59e0b";
+          for (let l = laserBeams.length - 1; l >= 0; l--) {
+            let laser = laserBeams[l];
+            laser.x += laser.speed;
+
+            ctx.shadowColor = "#f59e0b";
+            ctx.shadowBlur = 10;
+            ctx.fillRect(laser.x, laser.y - 2, 20, 5);
+            ctx.shadowBlur = 0;
+
+            for (let a = asteroids.length - 1; a >= 0; a--) {
+              let ast = asteroids[a];
+              let dist = Math.hypot(laser.x - ast.x, laser.y - ast.y);
+              if (dist < ast.radius + 10) {
+                explosions.push({ x: ast.x, y: ast.y, radius: 15, life: 12 });
+                asteroids.splice(a, 1);
+                laserBeams.splice(l, 1);
+                break;
+              }
+            }
+
+            if (laser && laser.x > w) laserBeams.splice(l, 1);
+          }
+
+          for (let a = asteroids.length - 1; a >= 0; a--) {
+            let ast = asteroids[a];
+            ast.x -= ast.speed;
+
+            ctx.fillStyle = "#64748b";
+            ctx.beginPath();
+            ctx.arc(ast.x, ast.y, ast.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#334155";
+            ctx.beginPath();
+            ctx.arc(ast.x - 3, ast.y - 2, ast.radius * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (ast.x < -20) asteroids.splice(a, 1);
+          }
+
+          for (let e = explosions.length - 1; e >= 0; e--) {
+            let exp = explosions[e];
+            ctx.fillStyle = "#f97316";
+            ctx.beginPath();
+            ctx.arc(exp.x, exp.y, exp.radius, 0, Math.PI * 2);
+            ctx.fill();
+            exp.radius += 1.5;
+            exp.life--;
+            if (exp.life <= 0) explosions.splice(e, 1);
+          }
+
+          ctx.fillStyle = "#f97316";
+          ctx.beginPath();
+          ctx.moveTo(rx - 15, ry - 6);
+          ctx.lineTo(rx - 28 - Math.random() * 10, ry);
+          ctx.lineTo(rx - 15, ry + 6);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = "#ec4899";
+          ctx.beginPath();
+          ctx.ellipse(rx, ry, 20, 11, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = "#be185d";
+          ctx.beginPath();
+          ctx.moveTo(rx - 10, ry);
+          ctx.lineTo(rx - 18, ry - 14);
+          ctx.lineTo(rx - 4, ry - 8);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = "#38bdf8";
+          ctx.beginPath();
+          ctx.arc(rx + 6, ry - 2, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        animFrameId = requestAnimationFrame(renderCanvasLoop);
+      }
+
+      window.onload = function () {
+        initDropdowns();
+        setupCanvas();
+      };
+    </script>
+  </body>
+</html>
