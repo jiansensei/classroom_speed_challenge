@@ -440,7 +440,7 @@
             class="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider"
           >
             <span id="questionCounter">Question 1 of 10</span>
-            <span id="pointsValueBadge" class="text-amber-400">+2 Points</span>
+            <span id="pointsValueBadge" class="text-amber-400">+3 Points</span>
           </div>
 
           <!-- Question Image Display Area -->
@@ -1619,9 +1619,9 @@
 
           if (currentMode === "speedChallenge") {
             if (headerSub) headerSub.innerText = "Speed Challenge Mode";
-            if (ptsBadge) ptsBadge.innerText = "+2 Points";
+            if (ptsBadge) ptsBadge.innerText = "+3 Points";
             if (descText)
-              descText.innerHTML = `<strong>Speed Challenge:</strong> Your rocket automatically dodges moving asteroids while starting with <span class="text-pink-300 font-bold">100 max points</span>. Points tick down (-1/s) while waiting to answer. Correct answers give <span class="text-emerald-400 font-bold">+2 Points</span> and <span class="text-pink-400 font-bold">FIRE LASERS</span> to blast obstacles!<br>ロケットは自動で動いていん石をよけます。さいしょは100点！答えを待つ間、1秒ごとに1点へります。正解すると2点ゲット！レーザーでいん石をこわそう！</br>`;
+              descText.innerHTML = `<strong>Speed Challenge:</strong> Your rocket automatically dodges moving asteroids while starting with <span class="text-pink-300 font-bold">100 max points</span>. Points tick down (-1/s) while waiting to answer. Correct answers give <span class="text-emerald-400 font-bold">+3 Points</span> and <span class="text-pink-400 font-bold">FIRE LASERS</span> to blast obstacles!<br>ロケットは自動で動いていん石をよけます。さいしょは100点！答えを待つ間、1秒ごとに1点へります。正解すると2点ゲット！レーザーでいん石をこわそう！</br>`;
             if (lbBtn)
               lbBtn.className =
                 "game-btn px-4 bg-pink-950/60 border border-pink-500/40 hover:bg-pink-900/60 rounded-2xl text-pink-300 font-semibold text-sm flex items-center justify-center gap-1.5 transition-colors";
@@ -1827,7 +1827,7 @@
 
         if (currentMode === "speedChallenge") {
           fireLaserCannon();
-          let added = 2; // Ginawang 2 points ang tamang sagot sa speed mode
+          let added = 3; // Ginawang 3 points ang tamang sagot sa speed mode
           if (isAsteroidImpact) {
             added = 5; // +5 bonus kapag nakaligtas sa impact area
           }
