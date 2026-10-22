@@ -1709,7 +1709,6 @@
 
       // --- IMPORT / EXPORT QUESTIONS FUNCTIONS ---
       function exportQuestionsJSON() {
-        // Tinitiyak na kasama ang category sa export data
         const exportData = defaultQuestions.map((q) => ({
           id: q.id || Date.now(),
           category: q.category || "General Knowledge",
@@ -1746,7 +1745,6 @@
                 image: q.image || "",
               }));
 
-              // I-sync ang mga bagong kategorya kung mayroon
               defaultQuestions.forEach((q) => {
                 if (q.category && !CATEGORIES.includes(q.category)) {
                   CATEGORIES.push(q.category);
@@ -1820,6 +1818,9 @@
         if (currentQuestions.length === 0) {
           currentQuestions = [...defaultQuestions];
         }
+
+        // Dito ginawang random o shuffle ang mga tanong tuwing magsisimula ang laro
+        currentQuestions.sort(() => Math.random() - 0.5);
 
         questionIndex = 0;
         score = currentMode === "speedChallenge" ? 100 : 0;
