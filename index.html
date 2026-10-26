@@ -248,6 +248,29 @@
             ></select>
           </div>
 
+          <!-- Goal Points Setting for Speed Challenge -->
+          <div id="goalPointSettingContainer" class="hidden">
+            <label
+              class="block text-xs font-semibold uppercase text-pink-300 mb-1"
+              >Target Goal Points (Optional)</label
+            >
+            <div class="relative">
+              <input
+                id="targetGoalInput"
+                type="number"
+                min="0"
+                placeholder="Set goal points (e.g. 110). Leave blank for High Score mode."
+                class="w-full px-4 py-3 bg-slate-800/90 border border-pink-500/40 rounded-xl focus:ring-2 focus:ring-pink-400 focus:outline-none text-white text-sm placeholder:text-slate-500"
+              />
+              <i
+                class="fa-solid fa-bullseye absolute right-4 top-3.5 text-pink-400"
+              ></i>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1">
+              * If reached, the section earns a Goal Achievement Badge!
+            </p>
+          </div>
+
           <!-- Volume Controls in Setup -->
           <div
             class="p-3 bg-slate-900/80 rounded-2xl border border-slate-700/80 flex items-center justify-between gap-3"
@@ -309,6 +332,7 @@
               type="button"
               onclick="showLeaderboardView()"
               class="game-btn px-4 bg-slate-800 border border-slate-700 hover:bg-slate-700 rounded-2xl text-sky-300 font-semibold text-sm flex items-center justify-center gap-1.5 transition-colors"
+              title="Scores & Badge Gallery"
             >
               <i id="leaderboardIcon" class="fa-solid fa-trophy"></i>
             </button>
@@ -602,7 +626,7 @@
         </button>
       </div>
 
-      <!-- ================= 4. LEADERBOARD SCREEN ================= -->
+      <!-- ================= 4. LEADERBOARD & BADGE GALLERY SCREEN ================= -->
       <div
         id="leaderboardScreen"
         class="hidden w-full glass-card rounded-3xl p-6 sm:p-8 space-y-6"
@@ -616,7 +640,7 @@
               id="leaderboardHeaderIcon"
               class="fa-solid fa-trophy text-amber-400"
             ></i>
-            Group Leaderboards
+            Scores & Badges
           </h2>
           <button
             onclick="resetToSetup()"
@@ -626,11 +650,43 @@
           </button>
         </div>
 
-        <div
-          id="leaderboardList"
-          class="space-y-3 max-h-[350px] overflow-y-auto pr-1"
-        >
-          <!-- Dynamic content -->
+        <!-- Leaderboard Navigation Tabs -->
+        <div class="flex border-b border-slate-700/80 gap-4">
+          <button
+            id="tabScoreLogsBtn"
+            onclick="switchLeaderboardTab('scores')"
+            class="py-2 px-3 text-xs font-bold border-b-2 border-pink-500 text-pink-400 transition"
+          >
+            <i class="fa-solid fa-list-ol mr-1"></i> Score Logs
+          </button>
+          <button
+            id="tabBadgeGalleryBtn"
+            onclick="switchLeaderboardTab('badges')"
+            class="py-2 px-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition"
+          >
+            <i class="fa-solid fa-award mr-1"></i>
+            <span id="badgeTabTitleText">Badge Gallery</span>
+          </button>
+        </div>
+
+        <!-- Score Logs Tab Panel -->
+        <div id="tabScoresContent" class="space-y-3">
+          <div
+            id="leaderboardList"
+            class="space-y-3 max-h-[350px] overflow-y-auto pr-1"
+          >
+            <!-- Dynamic content -->
+          </div>
+        </div>
+
+        <!-- Badge Gallery Tab Panel -->
+        <div id="tabBadgesContent" class="hidden space-y-3">
+          <div
+            id="badgeGalleryGrid"
+            class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[350px] overflow-y-auto pr-1"
+          >
+            <!-- Dynamic Badges rendering -->
+          </div>
         </div>
 
         <button
@@ -1076,31 +1132,148 @@
       </div>
     </div>
 
+    <!-- ================= BADGE DETAIL MODAL (JAPANESE & SUBJECT CATEGORY) ================= -->
+    <div
+      id="badgeDetailModal"
+      class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4"
+    >
+      <div
+        class="w-full max-w-sm glass-card-amber rounded-3xl p-6 text-center space-y-4 border border-amber-500/40 shadow-2xl relative overflow-hidden"
+      >
+        <button
+          onclick="closeBadgeDetailModal()"
+          class="absolute top-4 right-4 text-slate-400 hover:text-white text-sm"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div
+          class="relative w-24 h-24 mx-auto flex items-center justify-center"
+        >
+          <div
+            class="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 blur-md opacity-70 animate-pulse"
+          ></div>
+          <div
+            id="modalBadgeIcon"
+            class="relative text-6xl transform animate-bounce drop-shadow-lg"
+          >
+            🎖️
+          </div>
+        </div>
+
+        <div>
+          <span
+            id="modalBadgeJaLabel"
+            class="px-3 py-1 bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase rounded-full border border-amber-500/30"
+          >
+            獲得バッジ (Earned Badge)
+          </span>
+          <h3
+            id="modalBadgeTitle"
+            class="text-xl sm:text-2xl font-extrabold text-amber-300 font-display mt-2"
+          >
+            Goal Achiever Badge
+          </h3>
+          <p
+            id="modalBadgeJaTitle"
+            class="text-xs text-amber-200/90 font-bold mt-0.5"
+          >
+            目標達成バッジ
+          </p>
+        </div>
+
+        <div
+          class="p-4 bg-slate-900/90 border border-amber-500/30 rounded-2xl space-y-2 text-left"
+        >
+          <!-- Subject Category Display in Modal -->
+          <span
+            id="modalBadgeCategory"
+            class="text-[11px] font-bold text-sky-400 block pb-1 border-b border-slate-800"
+          >
+            📚 教科: Science
+          </span>
+
+          <span
+            class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mt-1"
+            >説明 / Description (JP)</span
+          >
+          <p
+            id="modalBadgeJaDesc"
+            class="text-xs text-slate-200 leading-relaxed font-medium"
+          >
+            先生が設定した目標ポイントを見事にクリアしました！素晴らしいチームワークです。
+          </p>
+
+          <div
+            class="pt-2 border-t border-slate-800 flex items-center justify-between text-xs"
+          >
+            <div>
+              <span class="text-slate-400 text-[10px] block"
+                >獲得スコア (Score)</span
+              >
+              <span
+                id="modalBadgeScoreVal"
+                class="font-bold text-emerald-400 font-mono"
+                >115 pts</span
+              >
+            </div>
+            <div class="text-right">
+              <span class="text-slate-400 text-[10px] block"
+                >獲得日 (Date)</span
+              >
+              <span
+                id="modalBadgeDateVal"
+                class="font-mono text-slate-300 font-bold"
+                >Oct 27, 2026</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <button
+          onclick="closeBadgeDetailModal()"
+          class="game-btn w-full py-3 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-lg shadow-amber-500/20"
+        >
+          閉じる (Close)
+        </button>
+      </div>
+    </div>
+
     <!-- ================= GAME LOGIC SCRIPT ================= -->
     <script>
-      // --- DATA STORES ---
+      // --- DATA STORES & LOCALSTORAGE LOGIC ---
       const CATEGORIES = [];
 
-      let gradeClassesData = {
+      let gradeClassesData = JSON.parse(
+        localStorage.getItem("eduquiz_gradeClassesData"),
+      ) || {
         "Grade 3": ["3-1", "3-2", "3-3", "3-4", "3-5", "3-6", "3-7"],
-        "Grade 4": ["4-1", "4-2", "4-4", "4-4", "4-5", "4-6", "4-7"],
+        "Grade 4": ["4-1", "4-2", "4-3", "4-4", "4-5", "4-6", "4-7"],
         "Grade 5": ["5-1", "5-2", "5-3", "5-4", "5-5", "5-6", "5-7"],
         "Grade 6": ["6-1", "6-2", "6-3", "6-4", "6-5", "6-6", "6-7"],
-        "Grade 7": ["7-1", "7-2", "7-7", "7-4", "7-5", "7-6", "7-7"],
-        "Grade 8": ["8-1", "8-2", "8-8", "8-4", "8-5", "8-6", "8-7"],
-        "Grade 9": ["9-1", "9-2", "9-9", "9-4", "9-5", "9-6", "9-7"],
+        "Grade 7": ["7-1", "7-2", "7-3", "7-4", "7-5", "7-6", "7-7"],
+        "Grade 8": ["8-1", "8-2", "8-3", "8-4", "8-5", "8-6", "8-7"],
+        "Grade 9": ["9-1", "9-2", "9-3", "9-4", "9-5", "9-6", "9-7"],
       };
 
-      let defaultQuestions = [];
+      let defaultQuestions =
+        JSON.parse(localStorage.getItem("eduquiz_questions")) || [];
 
-      let groupRecords = {};
-      let speedChallengeHistory = [];
-      let runHistoryLog = [];
+      let groupRecords =
+        JSON.parse(localStorage.getItem("eduquiz_groupRecords")) || {};
+
+      let speedChallengeHistory =
+        JSON.parse(localStorage.getItem("eduquiz_speedChallengeHistory")) || [];
+      let runHistoryLog =
+        JSON.parse(localStorage.getItem("eduquiz_runHistoryLog")) || [];
+      let classBadgesStore =
+        JSON.parse(localStorage.getItem("eduquiz_classBadgesStore")) || {};
 
       let currentMode = "timeAttack";
       let selectedCategory = "";
       let selectedGrade = "";
       let selectedClass = "";
+      let targetGoalPoints = 0;
 
       let currentQuestions = [];
       let questionIndex = 0;
@@ -1125,6 +1298,33 @@
       let isMuted = false;
       let bgmInterval = null;
       let bgmStep = 0;
+
+      function saveDataToLocalStorage() {
+        localStorage.setItem(
+          "eduquiz_gradeClassesData",
+          JSON.stringify(gradeClassesData),
+        );
+        localStorage.setItem(
+          "eduquiz_questions",
+          JSON.stringify(defaultQuestions),
+        );
+        localStorage.setItem(
+          "eduquiz_groupRecords",
+          JSON.stringify(groupRecords),
+        );
+        localStorage.setItem(
+          "eduquiz_speedChallengeHistory",
+          JSON.stringify(speedChallengeHistory),
+        );
+        localStorage.setItem(
+          "eduquiz_runHistoryLog",
+          JSON.stringify(runHistoryLog),
+        );
+        localStorage.setItem(
+          "eduquiz_classBadgesStore",
+          JSON.stringify(classBadgesStore),
+        );
+      }
 
       function updateMasterVolume(val) {
         masterVolume = parseFloat(val) / 100;
@@ -1344,6 +1544,7 @@
           gradeClassesData[val] = [];
           newGradeInput.value = "";
           initDropdowns();
+          saveDataToLocalStorage();
           alert(`Grade Level "${val}" successfully added!`);
         } else if (gradeClassesData[val]) {
           alert("Grade Level already exists!");
@@ -1367,6 +1568,7 @@
             gradeClassesData[selectedGrade].push(newClass);
             newClassInput.value = "";
             initDropdowns();
+            saveDataToLocalStorage();
             alert(`Class "${newClass}" added to ${selectedGrade}!`);
           } else {
             alert("Class Section already exists in this Grade Level!");
@@ -1394,6 +1596,17 @@
         if (admin) admin.classList.add("hidden");
       }
 
+      function updateBadgeTabTitle() {
+        const currentSection =
+          document.getElementById("classSelect")?.value || selectedClass;
+        const badges = classBadgesStore[currentSection] || [];
+        const count = badges.length;
+        const badgeTabTitle = document.getElementById("badgeTabTitleText");
+
+        const labelText = `Badge Gallery (${count})`;
+        if (badgeTabTitle) badgeTabTitle.innerText = labelText;
+      }
+
       function showLeaderboardView() {
         const setup = document.getElementById("setupScreen");
         const leaderboard = document.getElementById("leaderboardScreen");
@@ -1404,13 +1617,113 @@
 
         if (currentMode === "speedChallenge") {
           if (lbTitle)
-            lbTitle.innerHTML = `<i id="leaderboardHeaderIcon" class="fa-solid fa-trophy text-pink-400"></i> Speed Challenge History Logs`;
-          renderSpeedChallengeHistory();
+            lbTitle.innerHTML = `<i id="leaderboardHeaderIcon" class="fa-solid fa-trophy text-pink-400"></i> Speed Challenge History & Badges`;
         } else {
           if (lbTitle)
-            lbTitle.innerHTML = `<i id="leaderboardHeaderIcon" class="fa-solid fa-trophy text-amber-400"></i> Group Leaderboards`;
-          renderLeaderboard();
+            lbTitle.innerHTML = `<i id="leaderboardHeaderIcon" class="fa-solid fa-trophy text-amber-400"></i> Group Leaderboards & Badges`;
         }
+
+        updateBadgeTabTitle();
+        switchLeaderboardTab("scores");
+      }
+
+      function switchLeaderboardTab(tab) {
+        const tabScoresBtn = document.getElementById("tabScoreLogsBtn");
+        const tabBadgesBtn = document.getElementById("tabBadgeGalleryBtn");
+        const scoresContent = document.getElementById("tabScoresContent");
+        const badgesContent = document.getElementById("tabBadgesContent");
+
+        updateBadgeTabTitle();
+
+        if (tab === "scores") {
+          tabScoresBtn.className =
+            "py-2 px-3 text-xs font-bold border-b-2 border-pink-500 text-pink-400 transition";
+          tabBadgesBtn.className =
+            "py-2 px-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition";
+          scoresContent.classList.remove("hidden");
+          badgesContent.classList.add("hidden");
+
+          if (currentMode === "speedChallenge") {
+            renderSpeedChallengeHistory();
+          } else {
+            renderLeaderboard();
+          }
+        } else {
+          tabBadgesBtn.className =
+            "py-2 px-3 text-xs font-bold border-b-2 border-amber-500 text-amber-400 transition";
+          tabScoresBtn.className =
+            "py-2 px-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition";
+          badgesContent.classList.remove("hidden");
+          scoresContent.classList.add("hidden");
+
+          renderBadgeGallery();
+        }
+      }
+
+      function renderBadgeGallery() {
+        const gridElem = document.getElementById("badgeGalleryGrid");
+        if (!gridElem) return;
+
+        const currentSection =
+          document.getElementById("classSelect")?.value || selectedClass;
+        const badges = classBadgesStore[currentSection] || [];
+
+        updateBadgeTabTitle();
+
+        if (badges.length === 0) {
+          gridElem.innerHTML = `
+            <div class="col-span-full text-center text-slate-400 py-8 text-xs">
+              No badges earned yet for section <span class="text-amber-300 font-bold">${currentSection || "selected"}</span>.<br>Reach goal points or achieve high scores to earn badges!
+            </div>
+          `;
+          return;
+        }
+
+        gridElem.innerHTML = badges
+          .map((b, idx) => {
+            return `
+            <div 
+              onclick="openBadgeDetailModal('${currentSection}', ${idx})"
+              class="p-4 bg-slate-900/90 border border-amber-500/30 rounded-2xl flex flex-col items-center justify-center text-center space-y-2 hover:border-amber-400 cursor-pointer transition shadow-lg transform hover:-translate-y-1"
+            >
+              <div class="text-4xl sm:text-5xl my-1 animate-bounce">${b.icon}</div>
+              <span class="text-xs font-extrabold text-amber-300 block leading-tight">${b.title}</span>
+              <span class="text-[10px] text-amber-200/80 font-bold block">${b.jaTitle || "バッジ"}</span>
+              <span class="text-[9px] px-2 py-0.5 bg-sky-500/20 text-sky-300 rounded-full border border-sky-500/30 block font-semibold">📚 ${b.category || "General"}</span>
+              <span class="text-[9px] px-2 py-0.5 bg-amber-500/10 text-amber-300/80 rounded-full border border-amber-500/20 block font-mono">${b.date}</span>
+            </div>
+          `;
+          })
+          .join("");
+      }
+
+      function openBadgeDetailModal(section, badgeIndex) {
+        const badgeList = classBadgesStore[section];
+        if (!badgeList || !badgeList[badgeIndex]) return;
+
+        const b = badgeList[badgeIndex];
+        const modal = document.getElementById("badgeDetailModal");
+
+        document.getElementById("modalBadgeIcon").innerText = b.icon || "🎖️";
+        document.getElementById("modalBadgeTitle").innerText =
+          b.title || "Badge";
+        document.getElementById("modalBadgeJaTitle").innerText =
+          b.jaTitle || "特別バッジ";
+        document.getElementById("modalBadgeCategory").innerText =
+          `📚 教科 / Subject: ${b.category || "General Knowledge"}`;
+        document.getElementById("modalBadgeJaDesc").innerText =
+          b.jaDesc || b.desc || "おめでとうございます！";
+        document.getElementById("modalBadgeScoreVal").innerText =
+          `${b.scoreVal || 0} pts`;
+        document.getElementById("modalBadgeDateVal").innerText = b.date || "";
+
+        playChimeSound();
+        if (modal) modal.classList.remove("hidden");
+      }
+
+      function closeBadgeDetailModal() {
+        const modal = document.getElementById("badgeDetailModal");
+        if (modal) modal.classList.add("hidden");
       }
 
       function showGradeManagerView() {
@@ -1433,12 +1746,15 @@
         const listElem = document.getElementById("leaderboardList");
         if (!listElem) return;
 
+        const classElem = document.getElementById("classSelect");
+        const filterSection = classElem ? classElem.value : selectedClass;
+
         const filteredHistory = speedChallengeHistory.filter(
-          (item) => item.section === selectedClass,
+          (item) => item.section === filterSection,
         );
 
         if (filteredHistory.length === 0) {
-          listElem.innerHTML = `<div class="text-center text-slate-400 py-8 text-xs">No Speed Challenge history logs for section ${selectedClass} yet.</div>`;
+          listElem.innerHTML = `<div class="text-center text-slate-400 py-8 text-xs">No Speed Challenge history logs for section ${filterSection} yet.</div>`;
           return;
         }
 
@@ -1447,8 +1763,9 @@
             return `
           <div class="p-4 bg-slate-900/90 border border-pink-500/30 rounded-2xl flex items-center justify-between">
             <div>
-              <span class="text-xs font-bold text-pink-300 block">Section: ${item.section}</span>
+              <span class="text-xs font-bold text-pink-300 block">Section: ${item.section} [${item.category}]</span>
               <span class="text-[10px] text-slate-400 block mt-1"><i class="fa-solid fa-calendar-days mr-1"></i>${item.date}</span>
+              ${item.badgeEarned ? `<span class="inline-block mt-1 text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">🎖️ ${item.badgeEarned}</span>` : ""}
             </div>
             <div class="text-right">
               <span class="text-xs font-bold text-emerald-400 font-mono block">${item.score} pts</span>
@@ -1572,23 +1889,14 @@
 
         closeEditModal();
         renderAdminQuestions();
+        saveDataToLocalStorage();
         alert("Question updated successfully!");
       }
 
       // --- IMAGE INPUT & DROPBOX LOGIC ---
       function onImageUrlInput(val) {
         const imageInput = document.getElementById("adminImage");
-        const dropdown = document.getElementById("adminImageDropdown");
         if (imageInput) imageInput.value = val;
-        if (dropdown) dropdown.value = "";
-        showImagePreview(val);
-      }
-
-      function onImageDropdownChange(val) {
-        const imageInput = document.getElementById("adminImage");
-        const urlInput = document.getElementById("adminImageUrlInput");
-        if (imageInput) imageInput.value = val;
-        if (urlInput) urlInput.value = val;
         showImagePreview(val);
       }
 
@@ -1638,8 +1946,6 @@
           const urlInput = document.getElementById("adminImageUrlInput");
           if (imageInput) imageInput.value = base64Url;
           if (urlInput) urlInput.value = "";
-          const dropdown = document.getElementById("adminImageDropdown");
-          if (dropdown) dropdown.value = "";
           showImagePreview(base64Url);
         };
         reader.readAsDataURL(file);
@@ -1670,12 +1976,10 @@
           "imagePreviewContainer",
         );
         const content = document.getElementById("dropZoneContent");
-        const dropdown = document.getElementById("adminImageDropdown");
 
         if (imageInput) imageInput.value = "";
         if (urlInput) urlInput.value = "";
         if (fileInput) fileInput.value = "";
-        if (dropdown) dropdown.value = "";
         if (previewContainer) previewContainer.classList.add("hidden");
         if (content) content.classList.remove("hidden");
       }
@@ -1700,14 +2004,15 @@
         clearUploadedImage();
 
         renderAdminQuestions();
+        saveDataToLocalStorage();
       }
 
       function deleteQuestion(index) {
         defaultQuestions.splice(index, 1);
         renderAdminQuestions();
+        saveDataToLocalStorage();
       }
 
-      // --- IMPORT / EXPORT QUESTIONS FUNCTIONS ---
       function exportQuestionsJSON() {
         const exportData = defaultQuestions.map((q) => ({
           id: q.id || Date.now(),
@@ -1753,6 +2058,7 @@
 
               renderAdminQuestions();
               initDropdowns();
+              saveDataToLocalStorage();
               alert("Questions successfully imported!");
             } else {
               alert("Invalid JSON format for questions.");
@@ -1776,10 +2082,14 @@
           const lbBtn = document.getElementById("leaderboardBtn");
           const lbIcon = document.getElementById("leaderboardIcon");
           const ptsBadge = document.getElementById("pointsValueBadge");
+          const goalContainer = document.getElementById(
+            "goalPointSettingContainer",
+          );
 
           if (currentMode === "speedChallenge") {
             if (headerSub) headerSub.innerText = "Speed Challenge Mode";
             if (ptsBadge) ptsBadge.innerText = "+3 Points";
+            if (goalContainer) goalContainer.classList.remove("hidden");
             if (descText)
               descText.innerHTML = `<strong>Speed Challenge:</strong> Your rocket automatically dodges moving asteroids while starting with <span class="text-pink-300 font-bold">100 max points</span>. Points tick down (-1/s) while waiting to answer. Correct answers give <span class="text-emerald-400 font-bold">+3 Points</span> and <span class="text-pink-400 font-bold">FIRE LASERS</span> to blast obstacles!<br>ロケットは自動で動いていん石をよけます。さいしょは100点！答えを待つ間、1秒ごとに1点へります。正解すると2点ゲット！レーザーでいん石をこわそう！</br>`;
             if (lbBtn)
@@ -1789,6 +2099,7 @@
           } else {
             if (headerSub) headerSub.innerText = "Beat the Time Mode";
             if (ptsBadge) ptsBadge.innerText = "+1 Point";
+            if (goalContainer) goalContainer.classList.add("hidden");
             if (descText)
               descText.innerHTML = `<strong>Beat the Time:</strong> Read the prompt, then click <span class="text-amber-300 font-bold">"Reveal Answer"</span> to reveal the answer. Click <span class="text-amber-300 font-bold">"FINISH GAME"</span> anytime to save your completion time!<br>ほかのクラスの時間より早くして、チャンピオンになろう！</br>`;
             if (lbBtn)
@@ -1805,12 +2116,16 @@
         const catElem = document.getElementById("categorySelect");
         const gradeElem = document.getElementById("gradeSelect");
         const classElem = document.getElementById("classSelect");
+        const goalInput = document.getElementById("targetGoalInput");
 
         selectedCategory = catElem ? catElem.value : CATEGORIES[0];
         selectedGrade = gradeElem
           ? gradeElem.value
           : Object.keys(gradeClassesData)[0];
         selectedClass = classElem ? classElem.value : "";
+        targetGoalPoints = goalInput
+          ? parseInt(goalInput.value.trim(), 10) || 0
+          : 0;
 
         currentQuestions = defaultQuestions.filter(
           (q) => q.category === selectedCategory,
@@ -1819,7 +2134,6 @@
           currentQuestions = [...defaultQuestions];
         }
 
-        // Dito ginawang random o shuffle ang mga tanong tuwing magsisimula ang laro
         currentQuestions.sort(() => Math.random() - 0.5);
 
         questionIndex = 0;
@@ -2020,18 +2334,85 @@
       function updateScoreUI() {
         const scoreElem = document.getElementById("scoreDisplay");
         if (scoreElem) scoreElem.innerText = score;
+      }
 
-        const speedDelayStatus = document.getElementById("speedDelayStatus");
-        if (speedDelayStatus) {
-          if (currentMode === "speedChallenge") {
-            speedDelayStatus.classList.remove("hidden");
-            speedDelayStatus.innerText = `(-1 pt/s)`;
-            speedDelayStatus.className =
-              "text-[10px] text-rose-400 font-bold ml-1";
-          } else {
-            speedDelayStatus.classList.add("hidden");
+      function checkAndAwardBadges(section, finalScore, category) {
+        if (!classBadgesStore[section]) {
+          classBadgesStore[section] = [];
+        }
+
+        const dateStr = new Date().toLocaleDateString([], {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+        let earnedBadgeTitle = "";
+
+        // 1. Goal Points Reached Badge
+        if (targetGoalPoints > 0 && finalScore >= targetGoalPoints) {
+          earnedBadgeTitle = "Goal Achiever Badge";
+          if (
+            !classBadgesStore[section].some(
+              (b) =>
+                b.title === "Goal Achiever Badge" && b.category === category,
+            )
+          ) {
+            classBadgesStore[section].push({
+              title: "Goal Achiever Badge",
+              jaTitle: "目標達成バッジ",
+              category: category,
+              icon: "🎯",
+              desc: `Reached Teacher Goal of ${targetGoalPoints} pts in ${category}!`,
+              jaDesc: `${category} の授業で先生が設定した目標ポイント（${targetGoalPoints}点）を見事にクリアしました！`,
+              scoreVal: finalScore,
+              date: dateStr,
+            });
           }
         }
+
+        // 2. High Score Check & Badge
+        const highestPastScore = speedChallengeHistory
+          .filter(
+            (item) => item.section === section && item.category === category,
+          )
+          .reduce((max, item) => (item.score > max ? item.score : max), 0);
+
+        if (finalScore > highestPastScore) {
+          if (!earnedBadgeTitle) earnedBadgeTitle = "New High Score Badge";
+          classBadgesStore[section].push({
+            title: `High Score (${finalScore} pts)`,
+            jaTitle: "ハイスコア更新バッジ",
+            category: category,
+            icon: "🚀",
+            desc: `Set a new record high score for ${section} in ${category}!`,
+            jaDesc: `${category}の授業 ${section}クラスで最高記録を新しく更新しました！`,
+            scoreVal: finalScore,
+            date: dateStr,
+          });
+        }
+
+        // 3. Century Milestone Badges
+        if (finalScore >= 120) {
+          if (
+            !classBadgesStore[section].some(
+              (b) => b.title === "Star Blaster 120+" && b.category === category,
+            )
+          ) {
+            classBadgesStore[section].push({
+              title: "Star Blaster 120+",
+              jaTitle: "120点超えマスター",
+              category: category,
+              icon: "🌟",
+              desc: `Scored 120+ points in ${category} Speed Challenge!`,
+              jaDesc: `${category} の授業で120点以上の超高得点を獲得しました！`,
+              scoreVal: finalScore,
+              date: dateStr,
+            });
+          }
+        }
+
+        saveDataToLocalStorage();
+        return earnedBadgeTitle;
       }
 
       function finishGameManual() {
@@ -2048,14 +2429,23 @@
         });
 
         if (currentMode === "speedChallenge") {
+          let badgeAwarded = checkAndAwardBadges(
+            selectedClass,
+            score,
+            selectedCategory,
+          );
+
           speedChallengeHistory.unshift({
             section: selectedClass,
             category: selectedCategory,
             grade: selectedGrade,
             score: score,
             date: currentDateStr,
+            badgeEarned: badgeAwarded,
           });
-          closeModalAndShowSummary();
+
+          saveDataToLocalStorage();
+          showDethroneModal(true, selectedClass, 0, score);
           return;
         }
 
@@ -2084,6 +2474,7 @@
             mode: currentMode,
           };
 
+          saveDataToLocalStorage();
           showDethroneModal(true, selectedClass, elapsedTime, 0);
         } else {
           showDethroneModal(
@@ -2103,12 +2494,14 @@
         const timeBox = document.getElementById("modalTimeBox");
         const timeDisp = document.getElementById("modalTimeVal");
         const scoreContainer = document.getElementById("modalScoreContainer");
+        const scoreDisp = document.getElementById("modalScoreVal");
 
         if (groupCircle) groupCircle.innerText = sectionName;
 
         if (currentMode === "speedChallenge") {
           if (timeBox) timeBox.classList.add("hidden");
           if (scoreContainer) scoreContainer.classList.remove("hidden");
+          if (scoreDisp) scoreDisp.innerText = `${scoreVal} pts`;
         } else {
           if (timeBox) timeBox.classList.remove("hidden");
           if (scoreContainer) scoreContainer.classList.add("hidden");
@@ -2120,16 +2513,19 @@
         }
 
         if (title && desc) {
-          if (isDethroned) {
+          if (currentMode === "speedChallenge") {
+            title.innerText = "CHALLENGE COMPLETED! 🚀";
+            desc.innerHTML = `<strong class="text-amber-300">${sectionName}</strong> completed the Speed Challenge with <span class="text-emerald-400 font-bold">${scoreVal} points</span>!`;
+          } else if (isDethroned) {
             title.innerText = "NEW CHAMPION! 👑";
             desc.innerHTML = `<strong class="text-amber-300">${sectionName}</strong> 新しいチャンピオンだ！`;
-            try {
-              confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-            } catch (e) {}
           } else {
-            title.innerText = "UNDEFEATED CHAMPION!💪";
+            title.innerText = "UNDEFEATED CHAMPION! 💪";
             desc.innerHTML = `<strong class="text-amber-300">${sectionName}</strong>は、まだチャンピオンだ！. よくがんばったね！`;
           }
+          try {
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+          } catch (e) {}
         }
 
         if (modal) modal.classList.remove("hidden");
@@ -2179,7 +2575,7 @@
                   (run) => `
               <div class="flex items-center justify-between text-[11px] p-1.5 rounded-lg bg-slate-900 border border-slate-800/80">
                 <div class="flex items-center gap-1.5 truncate">
-                  <span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-pink-500/20 text-pink-300">Speed</span>
+                  <span class="px-1.5 py-0.5 text-[9px] font-bold rounded bg-pink-500/20 text-pink-300">${run.category}</span>
                   <span class="font-bold text-slate-200 truncate">${run.section}</span>
                 </div>
                 <div class="text-right flex items-center gap-2">
